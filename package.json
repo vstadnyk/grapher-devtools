@@ -4,6 +4,7 @@
 	"description": "Grapher devtools",
 	"repository": "https://github.com/vstadnyk/grapher-devtools.git",
 	"author": "Vladimir Stadnik <namirif@gmail.com>",
+	"license": "MIT",
 	"scripts": {
 		"build": "vue-cli-service build",
 		"lint": "vue-cli-service lint",
