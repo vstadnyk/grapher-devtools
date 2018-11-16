@@ -61,22 +61,20 @@ export default new Router({
 						key: 'date'
 					},
 					{
-						key: 'apptype'
+						key: 'apptype',
+						select: {
+							options: ['all', 'admin', 'web', 'mobile']
+						}
 					},
 					{
-						key: 'appplatform'
+						key: 'appplatform',
+						select: {
+							options: ['all', 'web', 'ios', 'android']
+						}
 					},
 					{
-						key: 'operationName'
-					},
-					{
-						key: 'selections'
-					},
-					{
-						key: 'variables'
-					},
-					{
-						key: 'fragments'
+						key: 'operationName',
+						input: true
 					}
 				]
 			}

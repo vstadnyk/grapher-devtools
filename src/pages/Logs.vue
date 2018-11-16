@@ -2,46 +2,67 @@
 	<section>
 		<header>
 			<h1>
-				<span>{{ type }}</span>
-				log
+				<span>{{ type }}</span> log
 			</h1>
-			<p>
+			<p v-if="!viewer">
 				<button @click="refresh" class="btn hightlight">Refresh</button>
 				<button v-if="count" @click="clear" class="btn hightlight">Clear</button>
 			</p>
+			<p v-if="viewer">
+				<button @click="viewerClose" class="btn hightlight">Close</button>
+			</p>
 		</header>
+
 		<div v-if="loading">Loading...</div>
 		<p v-if="error" class="error">{{ error }}</p>
-		<p v-if="count" align="right">
-			<Pagination ref="Pagination" :count="count" :limit="limit"/>
-		</p>
-		<table>
-			<tr>
-				<th v-for="row in fields" :key="row.key">
-					<span>{{ row.name || row.key }}</span>
-					<form @submit.prevent="filterSubmit" @reset="filterReset" v-if="row.input">
-						<input :name="row.key" required />
-						<button class="btn" type="submit">OK</button>
-						<button class="btn" type="reset">Reset</button>
-					</form>
-					<p v-if="row.select">
-						<select @change="filterSelect" :name="row.key">
-							<option v-for="option in row.select.options" :key="option">{{ option }}</option>
-						</select>
-					</p>
-				</th>
-			</tr>
-			<tbody v-if="count">
-				<tr v-for="(row, i) in rows" :key="i">
-					<td v-for="field in fields" :key="field.key">
-						{{ row[field.alias] || row[field.key] }}
-					</td>
+
+		<div v-if="!viewer">
+			<p v-if="count" align="right">
+				<Pagination ref="Pagination" :count="count" :limit="limit"/>
+			</p>
+			<table>
+				<tr>
+					<th v-for="row in fields" :key="row.key">
+						<span>{{ row.name || row.key }}</span>
+						<form @submit.prevent="filterSubmit" @reset="filterReset" v-if="row.input">
+							<input :name="row.key" required />
+							<button class="btn" type="submit">OK</button>
+							<button class="btn" type="reset">Reset</button>
+						</form>
+						<p v-if="row.select">
+							<select @change="filterSelect" :name="row.key">
+								<option v-for="option in row.select.options" :key="option">{{ option }}</option>
+							</select>
+						</p>
+					</th>
+					<th width="1"></th>
 				</tr>
-			</tbody>
-		</table>
-		<p v-if="count" align="right">
-			<Pagination ref="Pagination" :count="count" :limit="limit"/>
-		</p>
+				<tbody v-if="count">
+					<tr v-for="(row, i) in rows" :key="i">
+						<td v-for="field in fields" :key="field.key">
+							{{ row[field.alias] || row[field.key] }}
+						</td>
+						<td>
+							<button @click="view(row)" class="btn">View</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<p v-if="count" align="right">
+				<Pagination ref="Pagination" :count="count" :limit="limit"/>
+			</p>
+		</div>
+
+		<div v-if="viewer" class="viewer">
+			<table>
+				<tbody>
+					<tr v-for="[key, value] in Object.entries(viewer)" :key="key">
+						<th>{{ key }}</th>
+						<td class="code">{{ value }}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</section>
 </template>
 
@@ -59,6 +80,7 @@ export default {
 		count: null,
 		error: null,
 		loading: null,
+		viewer: null,
 		limit: 10,
 		offset: 0,
 		filtered: {}
@@ -136,6 +158,12 @@ export default {
 				console.error(Error.format(error, 'type'))
 			}
 		},
+		view(row) {
+			this.viewer = row
+		},
+		viewerClose() {
+			this.viewer = null
+		},
 		async filterSelect({ target: { value, name } }) {
 			if (value !== 'all') this.filtered = { [name]: value }
 			if (value === 'all') this.filtered = {}
@@ -179,6 +207,7 @@ header button {
 table {
 	font-size: 13px;
 	width: 100%;
+	max-width: 100%;
 	border-collapse: collapse;
 }
 td,
@@ -203,5 +232,11 @@ th button {
 }
 td {
 	vertical-align: top;
+}
+td.code {
+	white-space: pre-wrap;
+}
+div.viewer {
+	overflow-x: hidden;
 }
 </style>

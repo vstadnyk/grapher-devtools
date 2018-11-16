@@ -168,6 +168,7 @@ main > section > div {
 	grid-column: col / span 2;
 	background: #eee;
 	padding: 15px;
+	overflow: hidden;
 }
 main > section > div > * {
 	background-color: #f9f9f9;
