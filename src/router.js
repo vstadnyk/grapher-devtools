@@ -9,7 +9,7 @@ const load = view => () => import(/* webpackChunkName: "[request]" */ `./pages/$
 export default new Router({
 	mode: 'history',
 	base: process.env.BASE_URL,
-	linkActiveClass: 'active',
+	linkExactActiveClass: 'active',
 	routes: [
 		{
 			path: '/',
@@ -17,9 +17,69 @@ export default new Router({
 			component: Home
 		},
 		{
-			path: '/test',
-			name: 'Test',
-			component: load('Test')
+			path: '/error-logs',
+			name: 'Error logs',
+			component: load('Logs'),
+			props: {
+				type: 'errors',
+				fields: [
+					{
+						key: 'errorType',
+						alias: 'type',
+						input: true
+					},
+					{
+						key: 'date'
+					},
+					{
+						key: 'apptype',
+						select: {
+							options: ['all', 'admin', 'web', 'mobile']
+						}
+					},
+					{
+						key: 'appplatform',
+						select: {
+							options: ['all', 'web', 'ios', 'android']
+						}
+					},
+					{
+						key: 'operationName',
+						input: true
+					}
+				]
+			}
+		},
+		{
+			path: '/query-logs',
+			name: 'Query logs',
+			component: load('Logs'),
+			props: {
+				type: 'queries',
+				fields: [
+					{
+						key: 'date'
+					},
+					{
+						key: 'apptype'
+					},
+					{
+						key: 'appplatform'
+					},
+					{
+						key: 'operationName'
+					},
+					{
+						key: 'selections'
+					},
+					{
+						key: 'variables'
+					},
+					{
+						key: 'fragments'
+					}
+				]
+			}
 		}
 	]
 })

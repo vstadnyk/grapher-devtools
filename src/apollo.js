@@ -7,34 +7,46 @@ import { InMemoryCache } from 'apollo-cache-inmemory'
 import { split } from 'apollo-link'
 import { WebSocketLink } from 'apollo-link-ws'
 import { getMainDefinition } from 'apollo-utilities'
+import { setContext } from 'apollo-link-context'
 
-import { url, endpointPorts } from '../graphql.config'
+import Server from './controllers/server'
 
-const { hostname, protocol } = window.location
+const {
+	uri,
+	wsUri,
+	getHeaders,
+	config: { ws: wsConfig }
+} = Server
 
-const uri = '//'.concat(hostname, ':', endpointPorts[protocol.replace(':', '')], url)
-const wsUri = (protocol === 'https:' ? 'wss:' : 'ws:').concat(uri)
+const link = split(
+	({ query }) => {
+		const { kind, operation } = getMainDefinition(query)
+
+		return kind === 'OperationDefinition' && operation === 'subscription'
+	},
+	new WebSocketLink({
+		uri: wsUri,
+		options: wsConfig
+	}),
+	new HttpLink({
+		uri,
+		headers: getHeaders()
+	})
+)
 
 Vue.use(VueApollo)
 
 export default new VueApollo({
 	defaultClient: new ApolloClient({
-		link: split(
-			({ query }) => {
-				const { kind, operation } = getMainDefinition(query)
-
-				return kind === 'OperationDefinition' && operation === 'subscription'
-			},
-			new WebSocketLink({
-				uri: wsUri,
-				options: { reconnect: true }
-			}),
-			new HttpLink({ uri })
-		),
+		link: setContext(() => ({ headers: getHeaders() })).concat(link),
 		cache: new InMemoryCache(),
 		connectToDevTools: true
 	}),
 	defaultOptions: {
 		$loadingKey: 'loading'
+	},
+	errorHandler(error) {
+		console.log('Global error handler')
+		console.error(error)
 	}
 })

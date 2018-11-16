@@ -1,0 +1,43 @@
+query Test {
+	test
+}
+
+query ServerVersion {
+	serverInfo {
+		version
+	}
+}
+
+query ServerTime {
+	serverInfo {
+		dateTime
+	}
+}
+
+query ServerInfo {
+	serverInfo {
+		name
+		version
+		description
+		url
+		hostname
+		port
+		dateTime
+		timeZone
+		sslValidFrom
+		sslValidTo
+		apiEndPoint
+		apiEndPointEncrypted
+		subscriptionsEndPoint
+		subscriptionsEndPointEncrypted
+		dataBase
+	}
+}
+
+query ServerLog($type: String, $input: GetServerLog) {
+	serverLog(type: $type, input: $input)
+}
+
+mutation ClearServerLog($type: String = "errors") {
+	_clearServerLog(type: $type)
+}

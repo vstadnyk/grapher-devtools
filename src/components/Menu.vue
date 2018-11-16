@@ -26,11 +26,17 @@ export default {
 
 <style scoped>
 a {
-	font-weight: bold;
-	color: #2c3e50;
+	display: block;
+	padding: 12px;
+	border-left: 4px solid transparent;
+}
+a:hover,
+a.active {
+	background: #3d4045;
+	text-decoration: none;
 }
 a.active {
-	color: #42b983;
+	border-color: teal;
 }
 ul,
 li {

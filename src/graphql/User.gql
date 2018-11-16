@@ -1,0 +1,42 @@
+mutation Login($mail: String!, $pass: String!) {
+	_login(mail: $mail, pass: $pass) {
+		user {
+			...user
+		}
+		tokens {
+			accessToken
+			refreshToken
+		}
+	}
+}
+
+fragment user on User {
+	id
+	role
+	fullName
+	role
+	permission {
+		rules
+	}
+}
+
+query CurrentUser {
+	user {
+      ...user
+    }
+}
+
+mutation Logout {
+	_logout
+}
+
+query PingToken {
+	ping
+}
+
+mutation RefreshToken($token: String!) {
+	_refreshToken(refreshToken: $token) {
+		accessToken
+		refreshToken
+	}
+}
