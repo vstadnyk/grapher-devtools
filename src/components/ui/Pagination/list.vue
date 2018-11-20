@@ -29,7 +29,7 @@ export default {
 	created() {
 		const { count, limit } = this
 
-		this.pages = Math.round(count / limit)
+		this.pages = Math.ceil(count / limit)
 
 		this.$on('paginate', page => {
 			this.current = page

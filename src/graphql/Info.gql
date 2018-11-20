@@ -38,6 +38,40 @@ query ServerLog($type: String, $input: GetServerLog) {
 	serverLog(type: $type, input: $input)
 }
 
+query AuthInfo {
+	serverInfo {
+		JWT
+	}
+}
+
+query SSL {
+	serverInfo {
+		ssl
+	}
+}
+
+query AuthTokenInfo($token: String) {
+	tokenInfo(token: $token)
+}
+
+query AuthUser($input: GetUser) {
+	user(input: $input) {
+		id
+		mail
+		loginAt
+		firstName
+		lastName
+		fullName
+		role
+		registerWith
+		active
+	}
+}
+
 mutation ClearServerLog($type: String = "errors") {
 	_clearServerLog(type: $type)
+}
+
+mutation EditSSL($key: String!, $cert: String!) {
+	_editSSL(key: $key, cert: $cert)
 }

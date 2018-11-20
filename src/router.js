@@ -1,20 +1,23 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './pages/Home.vue'
+import About from './pages/About.vue'
 
 Vue.use(Router)
 
 const load = view => () => import(/* webpackChunkName: "[request]" */ `./pages/${view}.vue`)
 
 export default new Router({
-	mode: 'history',
+	mode: 'hash', // 'history',
 	base: process.env.BASE_URL,
 	linkExactActiveClass: 'active',
 	routes: [
 		{
 			path: '/',
-			name: 'Home',
-			component: Home
+			name: 'About',
+			meta: {
+				title: 'About'
+			},
+			component: About
 		},
 		{
 			path: '/error-logs',
@@ -78,6 +81,19 @@ export default new Router({
 					}
 				]
 			}
+		},
+		{
+			path: '/jwt',
+			name: 'JWT',
+			meta: {
+				title: 'JWT Authorization'
+			},
+			component: load('AuthJWT')
+		},
+		{
+			path: '/ssl',
+			name: 'SSL',
+			component: load('SSL')
 		}
 	]
 })

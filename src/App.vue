@@ -7,13 +7,14 @@
 				<Sidebar />
 			</aside>
 			<section>
-				<Topbar/>
-				<Logout ref="Logout"/>
+				<Topbar />
+				<Logout ref="Logout" />
+				<Loader ref="Loader" />
 				<div>
 					<router-view />
 				</div>
-				<Tray ref="Tray"/>
-				<Watch/>
+				<Tray ref="Tray" />
+				<Watch />
 			</section>
 		</main>
 	</div>
@@ -27,6 +28,7 @@ import Tray from './components/Tray.vue'
 import Watch from './components/Watch.vue'
 import Login from './layouts/Login.vue'
 import Offline from './layouts/Offline.vue'
+import Loader from './components/ui/Loader.vue'
 
 import { PingToken } from './graphql/User.gql'
 
@@ -41,7 +43,8 @@ export default {
 		Login,
 		Watch,
 		Tray,
-		Offline
+		Offline,
+		Loader
 	},
 	computed: {
 		isLogin() {
@@ -65,6 +68,11 @@ export default {
 			this.pingTokenInterval = setInterval(() => {
 				if (this.isOnline && this.$refs.Tray) this.$refs.Tray.ping(this.pingTokenInterval)
 			}, config.intervals.token)
+	},
+	created() {
+		this.$on('loader', (event = 'start') => {
+			if (this.$refs.Loader) this.$refs.Loader.$emit(event)
+		})
 	}
 }
 </script>
@@ -93,7 +101,7 @@ option {
 	padding: 7px;
 }
 input {
-	max-width: calc(100% - 32px);
+	max-width: calc(100% - 14px);
 }
 select {
 	appearance: none;
@@ -161,19 +169,25 @@ main > section {
 	color: #222;
 	display: grid;
 	grid-template-columns: [col] auto [col] 150px;
-	grid-template-rows: [row] 50px [row] auto [row] 50px;
+	grid-template-rows: [row] 50px [row] 5px [row] auto [row] 50px;
 }
-main > section > div {
-	grid-row: row 2;
+main > section > div:not(.loader) {
+	grid-row: row 3;
 	grid-column: col / span 2;
 	background: #eee;
 	padding: 15px;
+	padding-top: 10px;
 	overflow: hidden;
 }
-main > section > div > * {
+main > section > div:not(.loader) > * {
 	background-color: #f9f9f9;
 	padding: 10px;
 	height: calc(100% - 20px);
 	overflow-x: hidden;
+}
+.loader {
+	grid-row: row 2;
+	grid-column: col / span 2;
+	background: #eee;
 }
 </style>

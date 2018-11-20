@@ -1,9 +1,6 @@
 <template>
 	<section>
 		<header>
-			<h1>
-				<span>{{ type }}</span> log
-			</h1>
 			<p v-if="!viewer">
 				<button @click="refresh" class="btn hightlight">Refresh</button>
 				<button v-if="count" @click="clear" class="btn hightlight">Clear</button>
@@ -13,11 +10,10 @@
 			</p>
 		</header>
 
-		<div v-if="loading">Loading...</div>
 		<p v-if="error" class="error">{{ error }}</p>
 
 		<div v-if="!viewer">
-			<p v-if="count" align="right">
+			<p v-if="count && count > limit" align="right">
 				<Pagination ref="Pagination" :count="count" :limit="limit"/>
 			</p>
 			<table>
@@ -48,17 +44,14 @@
 					</tr>
 				</tbody>
 			</table>
-			<p v-if="count" align="right">
-				<Pagination ref="Pagination" :count="count" :limit="limit"/>
-			</p>
 		</div>
 
 		<div v-if="viewer" class="viewer">
 			<table>
 				<tbody>
 					<tr v-for="[key, value] in Object.entries(viewer)" :key="key">
-						<th>{{ key }}</th>
-						<td class="code">{{ value }}</td>
+						<th width="1">{{ key }}</th>
+						<td><code>{{ value }}</code></td>
 					</tr>
 				</tbody>
 			</table>
@@ -79,9 +72,8 @@ export default {
 		rows: null,
 		count: null,
 		error: null,
-		loading: null,
 		viewer: null,
-		limit: 10,
+		limit: 30,
 		offset: 0,
 		filtered: {}
 	}),
@@ -121,6 +113,8 @@ export default {
 				}
 			}
 
+			this.$parent.$emit('loader', 'start')
+
 			try {
 				const {
 					data: { serverLog: log }
@@ -128,8 +122,12 @@ export default {
 
 				this.count = log.count ? log.count : null
 				this.rows = log.count ? log.rows : null
+
+				this.$parent.$emit('loader', 'done')
 			} catch (error) {
 				this.error = Error.format(error, 'type')
+
+				this.$parent.$emit('loader', 'done')
 
 				console.error(Error.format(error, 'type'))
 			}
@@ -137,7 +135,7 @@ export default {
 		async clear() {
 			const { type } = this
 
-			this.loading = true
+			this.$parent.$emit('loader', 'start')
 
 			try {
 				const isClear = await this.$apollo.mutate({
@@ -150,9 +148,10 @@ export default {
 					this.rows = null
 				}
 
-				this.loading = null
+				this.$parent.$emit('loader', 'done')
 			} catch (error) {
-				this.loading = null
+				this.$parent.$emit('loader', 'done')
+
 				this.error = Error.format(error, 'type')
 
 				console.error(Error.format(error, 'type'))
@@ -192,14 +191,10 @@ export default {
 </script>
 
 <style scoped>
-h1 {
-	margin: 0;
-}
-h1 span {
-	text-transform: capitalize;
-}
 header p {
+	margin: 0;
 	margin-left: -5px;
+	margin-bottom: 10px;
 }
 header button {
 	margin: 0 5px;
@@ -237,6 +232,12 @@ td.code {
 	white-space: pre-wrap;
 }
 div.viewer {
-	overflow-x: hidden;
+	overflow: auto;
+}
+code {
+	display: block;
+	max-width: 700px;
+	white-space: pre-wrap;
+	word-break: break-all;
 }
 </style>

@@ -20,6 +20,8 @@ export default {
 	},
 	methods: {
 		async logout() {
+			this.$parent.$emit('loader', 'start')
+
 			try {
 				const {
 					data: { _logout }
@@ -28,6 +30,8 @@ export default {
 				})
 
 				if (_logout) this.$store.commit('logout')
+
+				this.$parent.$emit('loader', 'done')
 			} catch (error) {
 				console.log(error)
 			}
@@ -37,6 +41,9 @@ export default {
 </script>
 
 <style scoped>
+section {
+	border-bottom: 1px solid #ccc;
+}
 section > div {
 	display: flex;
 	align-items: center;

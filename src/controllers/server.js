@@ -23,7 +23,7 @@ export default class {
 		const { protocol, hostname } = window.location
 
 		return '//'.concat(
-			hostname === host ? hostname : host,
+			hostname === host ? host : hostname,
 			':',
 			ports[protocol.replace(':', '')]
 		)
