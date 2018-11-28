@@ -1,6 +1,9 @@
 <template>
 	<section v-if="!isLogin">
-		<form @submit.prevent="login">
+		<p class="error" v-if="!isOnline">
+			Server is offline
+		</p>
+		<form v-if="isOnline" @submit.prevent="login">
 			<h1>Authorization</h1>
 			<p>
 				<input autofocus type="mail" name="mail" placeholder="Email" required>
@@ -19,7 +22,6 @@
 <script>
 import { Login as mutation } from '../graphql/User.gql'
 import Form from '../controllers/form'
-import Error from '../controllers/error'
 
 export default {
 	name: 'Login',
@@ -30,6 +32,9 @@ export default {
 	computed: {
 		isLogin() {
 			return this.$store.state.isLogin
+		},
+		isOnline() {
+			return this.$store.state.isOnline
 		}
 	},
 	methods: {
@@ -38,12 +43,7 @@ export default {
 			this.error = 'Loading...'
 
 			try {
-				const {
-					data: { _login }
-				} = await this.$apollo.mutate({
-					mutation,
-					variables: Form.getData(e.target)
-				})
+				const { _login } = await this.$api.mutate(mutation, Form.getData(e.target))
 
 				if (_login) {
 					const {
@@ -64,9 +64,9 @@ export default {
 			} catch (error) {
 				this.loading = null
 
-				this.error = Error.format(error, 'type')
+				this.error = error.type
 
-				console.log(error)
+				console.error(error)
 			}
 		}
 	}

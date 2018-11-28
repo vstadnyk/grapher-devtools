@@ -1,0 +1,7 @@
+query ServerLog($type: String, $input: GetServerLog) {
+	serverLog(type: $type, input: $input)
+}
+
+mutation ClearServerLog($type: String = "errors") {
+	_clearServerLog(type: $type)
+}

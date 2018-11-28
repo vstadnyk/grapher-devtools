@@ -6,22 +6,21 @@ export const api = {
 		https: 3443
 	},
 	headers: {
-		apptype: 'admin',
-		applang: 'en',
-		appplatform: 'web',
-		authorization: null
+		Apptype: 'admin',
+		Applang: 'en',
+		Appplatform: 'web',
+		Authorization: null
 	},
 	ws: {
-		reconnect: true,
-		reconnectionAttempts: 3,
+		reconnect: false,
+		reconnectionAttempts: 5,
 		timeout: 10000
 	}
 }
 
 export const ping = {
 	intervals: {
-		server: 30000,
-		token: 30000
+		token: 3000
 	}
 }
 

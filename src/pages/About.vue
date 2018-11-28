@@ -1,6 +1,5 @@
 <template>
 	<section>
-		<div v-if="$apollo.loading">Loading...</div>
 		<Viewer v-if="serverInfo" :objectEntries="serverInfo"/>
 	</section>
 </template>
@@ -13,15 +12,16 @@ import Viewer from '../components/ui/Viewer.vue'
 export default {
 	name: 'About',
 	components: { Viewer },
-	apollo: {
-		serverInfo: {
-			query,
-			update: ({ serverInfo }) =>
-				serverInfo
-					? Object.entries(serverInfo).filter(
-							([key, value]) => value && key !== '__typename'
-					  )
-					: null
+	data: () => ({
+		serverInfo: null
+	}),
+	async created() {
+		try {
+			const { serverInfo } = await this.$api.query(query)
+
+			this.serverInfo = Object.entries(serverInfo)
+		} catch (error) {
+			console.error(error)
 		}
 	}
 }

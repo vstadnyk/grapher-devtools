@@ -94,6 +94,11 @@ export default new Router({
 			path: '/ssl',
 			name: 'SSL',
 			component: load('SSL')
+		},
+		{
+			path: '/restart',
+			name: 'Restart',
+			component: load('Restart')
 		}
 	]
 })

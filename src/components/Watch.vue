@@ -28,11 +28,7 @@ export default {
 		clearInterval(this.$parent.serverTimeInterval)
 
 		try {
-			const {
-				data: { serverInfo }
-			} = await this.$apollo.query({
-				query
-			})
+			const { serverInfo } = await this.$api.query({ query })
 
 			this.$store.commit('setServerTime', serverInfo.dateTime)
 		} catch (error) {

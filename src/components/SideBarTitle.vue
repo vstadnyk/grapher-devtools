@@ -7,7 +7,6 @@
 
 <script>
 import { ServerVersion as query } from '../graphql/Info.gql'
-import Error from '../controllers/error'
 
 export default {
 	name: 'SideBarTitle',
@@ -17,16 +16,12 @@ export default {
 	async created() {
 		try {
 			const {
-				data: {
-					serverInfo: { version }
-				}
-			} = await this.$apollo.query({
-				query
-			})
+				serverInfo: { version }
+			} = await this.$api.query({ query })
 
 			this.version = version
 		} catch (error) {
-			console.error(Error.format(error))
+			console.error(error)
 		}
 	}
 }

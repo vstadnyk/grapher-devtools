@@ -3,17 +3,13 @@
 		<div v-if="error" v-text="error" class="error"/>
 		<section>
 			<div>
-				<h2>Auth Info</h2>
 				<div v-if="info" class="info">
 					<Viewer :objectEntries="info"/>
 				</div>
 			</div>
 			<div>
-				<h2>Get token info</h2>
 				<form @submit.prevent="submit" @reset="reset">
-					<p>
-						<input type="text" name="token" required>
-					</p>
+					<input type="text" name="token" required placeholder="AccessToken">
 					<div v-if="tokenInfo">
 						<Viewer :objectEntries="tokenInfo"/>
 						<p>
@@ -34,8 +30,7 @@
 </template>
 
 <script>
-import { AuthInfo, AuthTokenInfo, AuthUser } from '../graphql/Info.gql'
-import Error from '../controllers/error'
+import { AuthInfo, AuthTokenInfo, AuthUser } from '../graphql/User.gql'
 import Form from '../controllers/form'
 import Viewer from '../components/ui/Viewer.vue'
 
@@ -54,10 +49,8 @@ export default {
 
 		try {
 			const {
-				data: {
-					serverInfo: { JWT: info }
-				}
-			} = await this.$apollo.query({ query: AuthInfo })
+				serverInfo: { JWT: info }
+			} = await this.$api.query(AuthInfo)
 
 			this.$parent.$emit('loader', 'done')
 
@@ -65,26 +58,22 @@ export default {
 				([key, value]) => key && typeof value === 'string'
 			)
 		} catch (error) {
-			this.error = Error.format(error, 'type')
+			this.error = error.type
 
 			this.$parent.$emit('loader', 'done')
 
-			console.error(Error.format(error))
+			console.error(error)
 		}
 	},
 	methods: {
 		async submit({ target: form }) {
-			const variables = Form.getData(form)
-
 			this.error = null
 			this.tokenInfo = null
 
 			this.$parent.$emit('loader', 'start')
 
 			try {
-				const {
-					data: { tokenInfo }
-				} = await this.$apollo.query({ query: AuthTokenInfo, variables })
+				const { tokenInfo } = await this.$api.query(AuthTokenInfo, Form.getData(form))
 
 				this.$parent.$emit('loader', 'done')
 
@@ -93,9 +82,9 @@ export default {
 			} catch (error) {
 				this.$parent.$emit('loader', 'done')
 
-				this.error = Error.format(error, 'type')
+				this.error = error.type
 
-				console.error(Error.format(error))
+				console.error(error)
 			}
 		},
 		async getUser() {
@@ -107,9 +96,7 @@ export default {
 			this.$parent.$emit('loader', 'start')
 
 			try {
-				const {
-					data: { user }
-				} = await this.$apollo.query({ query: AuthUser, variables: { mail, rid } })
+				const { user } = await this.$api.query(AuthUser, { mail, rid })
 
 				this.$parent.$emit('loader', 'done')
 
@@ -118,9 +105,9 @@ export default {
 			} catch (error) {
 				this.$parent.$emit('loader', 'done')
 
-				this.error = Error.format(error, 'type')
+				this.error = error.type
 
-				console.error(Error.format(error))
+				console.error(error)
 			}
 		},
 		reset() {
@@ -135,11 +122,11 @@ export default {
 <style scoped>
 section > section {
 	display: grid;
-	padding: 0 10px;
 	grid-template-columns: [col] 250px [col] auto;
 	grid-template-rows: auto;
 }
 input {
+	margin-top: 5px;
 	width: 100%;
 }
 button[type='reset'] {

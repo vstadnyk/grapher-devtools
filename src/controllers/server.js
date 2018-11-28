@@ -1,4 +1,4 @@
-import config from '../../config'
+import { api as config } from '../../config'
 
 export default class {
 	static get config() {
@@ -8,8 +8,7 @@ export default class {
 	static getHeaders() {
 		const headers = {}
 
-		// eslint-disable-next-line import/no-named-as-default-member
-		Object.entries(config.api.headers).forEach(([key, value]) => {
+		Object.entries(config.headers).forEach(([key, value]) => {
 			if (!localStorage.getItem(key) && value) localStorage.setItem(key, value)
 
 			Object.assign(headers, { [key]: localStorage.getItem(key) })
@@ -19,7 +18,7 @@ export default class {
 	}
 
 	static get url() {
-		const { host, ports } = this.config.api
+		const { host, ports } = config
 		const { protocol, hostname } = window.location
 
 		return '//'.concat(
@@ -30,7 +29,7 @@ export default class {
 	}
 
 	static get uri() {
-		return this.url.concat(this.config.api.url)
+		return this.url.concat(config.url)
 	}
 
 	static get protocol() {

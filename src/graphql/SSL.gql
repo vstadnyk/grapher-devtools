@@ -1,0 +1,9 @@
+query SSL {
+	serverInfo {
+		ssl
+	}
+}
+
+mutation EditSSL($key: String!, $cert: String!) {
+	_editSSL(key: $key, cert: $cert)
+}

@@ -4,7 +4,6 @@
 
 <script>
 import { PingToken, RefreshToken } from '../graphql/User.gql'
-import Error from '../controllers/error'
 
 export default {
 	name: 'Tray',
@@ -18,12 +17,9 @@ export default {
 			this.operation = 'Ping token...'
 			this.timer = timer
 
-			this.$apollo
-				.query({
-					query: PingToken,
-					fetchPolicy: 'network-only'
-				})
-				.then(({ data: { ping } }) => {
+			this.$api
+				.query(PingToken)
+				.then(({ ping }) => {
 					console.log(this.operation, ping)
 
 					this.operation = null
@@ -38,34 +34,30 @@ export default {
 			this.error = null
 			this.operation = 'Refresh token...'
 
-			this.$apollo
+			this.$api
 				.mutate({
 					mutation: RefreshToken,
-					variables: { token: localStorage.getItem('refreshToken') }
+					variables: { token: localStorage.getItem('RefreshToken') }
 				})
 				.then(({ data: { _refreshToken } }) => {
 					console.log(this.operation, !!_refreshToken)
 
 					this.operation = null
 
-					this.$store.commit('refreshToken', _refreshToken)
+					this.$store.commit('RefreshToken', _refreshToken)
 				})
 				.catch(error => {
 					this.$store.commit('logout')
 
 					this.emitError(error)
-
-					if (!error.networkError)
-						console.error(Error.format(error, 'type'), Error.format(error))
 				})
 		},
 		emitError(error) {
-			if (!error.networkError) return
-
 			console.error(error)
 
 			this.error = true
-			this.operation = Error.format(error)
+			this.operation = error.type
+
 			clearInterval(this.timer)
 		}
 	}

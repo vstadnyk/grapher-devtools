@@ -19,8 +19,7 @@
 </template>
 
 <script>
-import { SSL as query } from '../graphql/Info.gql'
-import Error from '../controllers/error'
+import { SSL as query, EditSSL as mutation } from '../graphql/SSL.gql'
 
 export default {
 	data: () => ({
@@ -36,10 +35,8 @@ export default {
 
 		try {
 			const {
-				data: {
-					serverInfo: { ssl: info }
-				}
-			} = await this.$apollo.query({ query })
+				serverInfo: { ssl: info }
+			} = await this.$api.query(query)
 
 			this.$parent.$emit('loader', 'done')
 
@@ -49,15 +46,31 @@ export default {
 		} catch (error) {
 			this.$parent.$emit('loader', 'done')
 
-			this.error = Error.format(error, 'type')
+			this.error = error.type
 
-			console.error(Error.format(error))
+			console.error(error)
 		}
 	},
 	methods: {
 		async submit() {
 			this.$parent.$emit('loader', 'start')
-			// const { key, cert } = this
+			const { key, cert } = this
+
+			this.error = null
+
+			try {
+				const save = await this.$api.mutate(mutation, { key, cert })
+
+				if (save) this.info = { key, cert }
+
+				this.$parent.$emit('loader', 'done')
+			} catch (error) {
+				this.$parent.$emit('loader', 'done')
+
+				this.error = error.type
+
+				console.error(error)
+			}
 		},
 		reset() {
 			this.key = this.info.key
@@ -68,17 +81,15 @@ export default {
 </script>
 
 <style scoped>
-form {
-	padding: 0 15px;
-}
 form div {
 	display: grid;
 	grid-template-columns: [col] 50% [col] 50%;
 	grid-template-rows: auto;
+	justify-content: space-between;
 }
 textarea {
-	width: 100%;
-	max-width: calc(100% - 16px);
+	display: inline-block;
+	width: calc(100% - 16px);
 	resize: none;
 	overflow: auto;
 	height: 370px;

@@ -19,20 +19,20 @@ export default new Vuex.Store({
 				user
 			} = data
 
-			if (accessToken) localStorage.setItem('authorization', accessToken)
-			if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+			if (accessToken) localStorage.setItem('Authorization', accessToken)
+			if (refreshToken) localStorage.setItem('RefreshToken', refreshToken)
 
 			Object.assign(state, { user, isLogin: true })
 		},
 		logout(state) {
-			localStorage.removeItem('authorization')
-			localStorage.removeItem('refreshToken')
+			localStorage.removeItem('Authorization')
+			localStorage.removeItem('RefreshToken')
 
 			Object.assign(state, { user: null, isLogin: null })
 		},
 		refreshToken(state, { accessToken, refreshToken } = {}) {
-			if (accessToken) localStorage.setItem('authorization', accessToken)
-			if (refreshToken) localStorage.setItem('refreshToken', refreshToken)
+			if (accessToken) localStorage.setItem('Authorization', accessToken)
+			if (refreshToken) localStorage.setItem('RefreshToken', refreshToken)
 
 			Object.assign(state, { isLogin: !!accessToken })
 		},

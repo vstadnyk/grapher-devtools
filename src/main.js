@@ -3,39 +3,23 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-import apolloProvider from './apollo'
-
-import Server from './controllers/server'
-
-const {
-	url,
-	config: {
-		ping: { intervals }
-	}
-} = Server
+import API from './controllers/api'
 
 Vue.config.productionTip = false
 
-const ping = () =>
-	fetch(url)
-		.then(() => {
-			store.commit('isOnline', true)
-		})
-		.catch(error => {
-			console.error('Ping server error', error)
+const api = new API()
 
-			store.commit('isOnline', null)
-		})
+Object.assign(api, {
+	install() {
+		Vue.prototype.$api = this
+	}
+})
 
-ping()
-
-setInterval(() => {
-	ping()
-}, intervals.server)
+Vue.use(api)
 
 new Vue({
 	router,
 	store,
-	apolloProvider,
+	api,
 	render: h => h(App)
 }).$mount('#app')

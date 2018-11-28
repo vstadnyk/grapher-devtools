@@ -1,8 +1,7 @@
 <template>
 	<div>
-		<Offline v-if="!isOnline" ref="Offline" />
-		<Login v-if="isOnline" ref="Login" />
-		<main v-if="isOnline && isLogin">
+		<Login ref="Login" />
+		<main v-if="isLogin">
 			<aside>
 				<Sidebar />
 			</aside>
@@ -27,7 +26,6 @@ import Logout from './components/Logout.vue'
 import Tray from './components/Tray.vue'
 import Watch from './components/Watch.vue'
 import Login from './layouts/Login.vue'
-import Offline from './layouts/Offline.vue'
 import Loader from './components/ui/Loader.vue'
 
 import { PingToken } from './graphql/User.gql'
@@ -43,7 +41,6 @@ export default {
 		Login,
 		Watch,
 		Tray,
-		Offline,
 		Loader
 	},
 	computed: {
@@ -55,19 +52,19 @@ export default {
 		}
 	},
 	async beforeCreate() {
-		const {
-			data: { ping }
-		} = await this.$apollo.query({
-			query: PingToken,
-			fetchPolicy: 'network-only'
-		})
+		try {
+			const { ping } = await this.$api.query(PingToken)
 
-		this.$store.commit('isLogin', ping)
+			this.$store.commit('isLogin', ping)
 
-		if (config.intervals.token)
-			this.pingTokenInterval = setInterval(() => {
-				if (this.isOnline && this.$refs.Tray) this.$refs.Tray.ping(this.pingTokenInterval)
-			}, config.intervals.token)
+			if (config.intervals.token)
+				this.pingTokenInterval = setInterval(() => {
+					if (this.isOnline && this.$refs.Tray)
+						this.$refs.Tray.ping(this.pingTokenInterval)
+				}, config.intervals.token)
+		} catch (error) {
+			throw error
+		}
 	},
 	created() {
 		this.$on('loader', (event = 'start') => {

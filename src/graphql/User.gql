@@ -1,15 +1,3 @@
-mutation Login($mail: String!, $pass: String!) {
-	_login(mail: $mail, pass: $pass) {
-		user {
-			...user
-		}
-		tokens {
-			accessToken
-			refreshToken
-		}
-	}
-}
-
 fragment user on User {
 	id
 	role
@@ -32,6 +20,42 @@ mutation Logout {
 
 query PingToken {
 	ping
+}
+
+query AuthTokenInfo($token: String) {
+	tokenInfo(token: $token)
+}
+
+query AuthUser($input: GetUser) {
+	user(input: $input) {
+		id
+		mail
+		loginAt
+		firstName
+		lastName
+		fullName
+		role
+		registerWith
+		active
+	}
+}
+
+query AuthInfo {
+	serverInfo {
+		JWT
+	}
+}
+
+mutation Login($mail: String!, $pass: String!) {
+	_login(mail: $mail, pass: $pass) {
+		user {
+			...user
+		}
+		tokens {
+			accessToken
+			refreshToken
+		}
+	}
 }
 
 mutation RefreshToken($token: String!) {

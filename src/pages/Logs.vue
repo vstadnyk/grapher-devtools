@@ -10,7 +10,7 @@
 			</p>
 		</header>
 
-		<p v-if="error" class="error">{{ error }}</p>
+		<p v-if="error" v-text="error" class="error"/>
 
 		<div v-if="!viewer">
 			<p v-if="count && count > limit" align="right">
@@ -31,15 +31,11 @@
 							</select>
 						</p>
 					</th>
-					<th width="1"></th>
 				</tr>
 				<tbody v-if="count">
 					<tr v-for="(row, i) in rows" :key="i">
-						<td v-for="field in fields" :key="field.key">
+						<td v-for="field in fields" :key="field.key" @click="view(row)">
 							{{ row[field.alias] || row[field.key] }}
-						</td>
-						<td>
-							<button @click="view(row)" class="btn">View</button>
 						</td>
 					</tr>
 				</tbody>
@@ -60,8 +56,7 @@
 </template>
 
 <script>
-import { ServerLog as query, ClearServerLog as mutation } from '../graphql/Info.gql'
-import Error from '../controllers/error'
+import { ServerLog as query, ClearServerLog as mutation } from '../graphql/Logs.gql'
 import Form from '../controllers/form'
 import Pagination from '../components/ui/Pagination/list.vue'
 
@@ -116,20 +111,18 @@ export default {
 			this.$parent.$emit('loader', 'start')
 
 			try {
-				const {
-					data: { serverLog: log }
-				} = await this.$apollo.query({ query, variables, fetchPolicy: 'network-only' })
+				const { serverLog: log } = await this.$api.query(query, variables)
 
 				this.count = log.count ? log.count : null
 				this.rows = log.count ? log.rows : null
 
 				this.$parent.$emit('loader', 'done')
 			} catch (error) {
-				this.error = Error.format(error, 'type')
+				this.error = error.type
 
 				this.$parent.$emit('loader', 'done')
 
-				console.error(Error.format(error, 'type'))
+				console.error(error)
 			}
 		},
 		async clear() {
@@ -138,10 +131,7 @@ export default {
 			this.$parent.$emit('loader', 'start')
 
 			try {
-				const isClear = await this.$apollo.mutate({
-					mutation,
-					variables: { type }
-				})
+				const isClear = await this.$api.mutate(mutation, { type })
 
 				if (isClear) {
 					this.count = null
@@ -152,9 +142,9 @@ export default {
 			} catch (error) {
 				this.$parent.$emit('loader', 'done')
 
-				this.error = Error.format(error, 'type')
+				this.error = error.type
 
-				console.error(Error.format(error, 'type'))
+				console.error(error)
 			}
 		},
 		view(row) {
@@ -222,7 +212,7 @@ th select {
 	width: 100%;
 }
 th button {
-	padding: 8px;
+	padding: 4px 8px;
 	margin-left: 5px;
 }
 td {
@@ -230,6 +220,12 @@ td {
 }
 td.code {
 	white-space: pre-wrap;
+}
+tbody tr {
+	cursor: pointer;
+}
+tbody tr:hover {
+	background-color: #eee;
 }
 div.viewer {
 	overflow: auto;
