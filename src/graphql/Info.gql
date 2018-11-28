@@ -38,6 +38,10 @@ query ServerInfo {
 	}
 }
 
+mutation StopServer {
+	_stopServer
+}
+
 mutation RestartServer {
 	_restartServer
 }

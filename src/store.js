@@ -10,6 +10,14 @@ export default new Vuex.Store({
 		user: null,
 		serverTime: null
 	},
+	getters: {
+		accessToken() {
+			return localStorage.getItem('Authorization')
+		},
+		refreshToken() {
+			return localStorage.getItem('RefreshToken')
+		}
+	},
 	mutations: {
 		login(state, data = null) {
 			if (!data) return

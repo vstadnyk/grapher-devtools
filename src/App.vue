@@ -52,6 +52,8 @@ export default {
 		}
 	},
 	async beforeCreate() {
+		if (this.$store.getters.accessToken) this.$store.commit('isLogin', true)
+
 		try {
 			const { ping } = await this.$api.query(PingToken)
 
@@ -59,8 +61,7 @@ export default {
 
 			if (config.intervals.token)
 				this.pingTokenInterval = setInterval(() => {
-					if (this.isOnline && this.$refs.Tray)
-						this.$refs.Tray.ping(this.pingTokenInterval)
+					if (this.$refs.Tray) this.$refs.Tray.ping()
 				}, config.intervals.token)
 		} catch (error) {
 			throw error

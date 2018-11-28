@@ -102,6 +102,10 @@ export default {
 				input: {
 					...filtered,
 					params: {
+						order: {
+							column: 'date',
+							sort: 'DESC'
+						},
 						limit,
 						offset
 					}

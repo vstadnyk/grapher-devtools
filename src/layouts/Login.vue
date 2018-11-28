@@ -3,7 +3,7 @@
 		<p class="error" v-if="!isOnline">
 			Server is offline
 		</p>
-		<form v-if="isOnline" @submit.prevent="login">
+		<form v-if="isOnline && !isLogin" @submit.prevent="login">
 			<h1>Authorization</h1>
 			<p>
 				<input autofocus type="mail" name="mail" placeholder="Email" required>

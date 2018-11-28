@@ -12,10 +12,11 @@ export default {
 		operation: null
 	}),
 	methods: {
-		ping(timer) {
+		ping() {
 			this.error = null
 			this.operation = 'Ping token...'
-			this.timer = timer
+
+			this.$store.commit('isOnline', true)
 
 			this.$api
 				.query(PingToken)
@@ -23,6 +24,7 @@ export default {
 					console.log(this.operation, ping)
 
 					this.operation = null
+					this.error = null
 
 					if (!ping) this.refresh()
 				})
@@ -37,14 +39,14 @@ export default {
 			this.$api
 				.mutate({
 					mutation: RefreshToken,
-					variables: { token: localStorage.getItem('RefreshToken') }
+					variables: { token: this.$store.getters.refreshToken }
 				})
 				.then(({ data: { _refreshToken } }) => {
 					console.log(this.operation, !!_refreshToken)
 
 					this.operation = null
 
-					this.$store.commit('RefreshToken', _refreshToken)
+					this.$store.commit('refreshToken', _refreshToken)
 				})
 				.catch(error => {
 					this.$store.commit('logout')
@@ -55,10 +57,10 @@ export default {
 		emitError(error) {
 			console.error(error)
 
+			this.$store.commit('isOnline', error.type === 'CONNECTION_FAILED')
+
 			this.error = true
 			this.operation = error.type
-
-			clearInterval(this.timer)
 		}
 	}
 }

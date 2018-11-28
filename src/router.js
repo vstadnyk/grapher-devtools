@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import About from './pages/About.vue'
+import Server from './pages/Server.vue'
 
 Vue.use(Router)
 
@@ -13,11 +13,11 @@ export default new Router({
 	routes: [
 		{
 			path: '/',
-			name: 'About',
+			name: 'Server',
 			meta: {
-				title: 'About'
+				title: 'Server'
 			},
-			component: About
+			component: Server
 		},
 		{
 			path: '/error-logs',
@@ -94,11 +94,6 @@ export default new Router({
 			path: '/ssl',
 			name: 'SSL',
 			component: load('SSL')
-		},
-		{
-			path: '/restart',
-			name: 'Restart',
-			component: load('Restart')
 		}
 	]
 })

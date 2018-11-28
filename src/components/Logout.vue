@@ -7,15 +7,10 @@
 </template>
 
 <script>
-import { Logout as mutation, CurrentUser as query } from '../graphql/User.gql'
+import { Logout as mutation } from '../graphql/User.gql'
 
 export default {
 	name: 'Logout',
-	async created() {
-		/* const { user } = await this.$api.query(query)
-
-		if (user) this.$store.commit('setUser', user) */
-	},
 	methods: {
 		async logout() {
 			this.$parent.$emit('loader', 'start')
