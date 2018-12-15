@@ -21,5 +21,10 @@ new Vue({
 	router,
 	store,
 	api,
-	render: h => h(App)
+	render: h => h(App),
+	computed: {
+		$app() {
+			return this.$children[0]
+		}
+	}
 }).$mount('#app')

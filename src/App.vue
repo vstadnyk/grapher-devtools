@@ -21,12 +21,12 @@
 
 <script>
 import Sidebar from './layouts/Sidebar.vue'
-import Topbar from './components/Topbar.vue'
-import Logout from './components/Logout.vue'
-import Tray from './components/Tray.vue'
-import Watch from './components/Watch.vue'
+import Topbar from './layouts/Topbar.vue'
+import Logout from './layouts/Logout.vue'
+import Tray from './layouts/Tray.vue'
+import Watch from './layouts/Watch.vue'
 import Login from './layouts/Login.vue'
-import Loader from './components/ui/Loader.vue'
+import Loader from './components/Loader.vue'
 
 import { PingToken } from './graphql/User.gql'
 
@@ -92,14 +92,16 @@ a:hover {
 }
 input,
 select,
-option {
+option,
+textarea {
 	font-family: inherit;
 	font-size: inherit;
 	border: 1px solid #ccc;
 	padding: 7px;
 }
-input {
-	max-width: calc(100% - 14px);
+input,
+textarea {
+	max-width: calc(100% - 16px);
 }
 select {
 	appearance: none;
@@ -119,21 +121,30 @@ button {
 	padding: 0;
 	background: transparent;
 }
+label sup {
+	color: red;
+	padding-right: 5px;
+}
 .btn {
+	cursor: pointer;
 	background: #ccc;
 	padding: 7px 20px;
 }
 .btn span {
 	margin-left: -5px;
 }
-.btn.hightlight,
-.btn:not(.hightlight):hover {
+.btn:hover {
+	background-color: #eee;
+}
+.btn.hightlight {
 	background-color: teal;
 	color: white;
 }
-.btn.hightlight:not(.btn[disabled]):hover {
-	color: #222;
-	background: #ccc;
+.btn.hightlight:not([disabled]):hover {
+	background: rgba(0, 128, 128, 0.7);
+}
+a.btn:hover {
+	text-decoration: none;
 }
 .btn.red {
 	background-color: lightcoral;
@@ -146,6 +157,33 @@ button {
 }
 .error {
 	color: red;
+}
+code {
+	display: block;
+	max-width: 700px;
+	white-space: pre-wrap;
+	word-break: break-all;
+	font-size: inherit;
+}
+table {
+	font-size: 13px;
+	width: 100%;
+	max-width: 100%;
+	border-collapse: collapse;
+}
+td,
+th {
+	border: 1px solid #ccc;
+	padding: 5px;
+}
+th {
+	text-align: center;
+}
+td.code {
+	white-space: pre-wrap;
+}
+div.viewer {
+	overflow: auto;
 }
 </style>
 
@@ -166,6 +204,7 @@ main > section {
 	background: #f9f9f9;
 	color: #222;
 	display: grid;
+	height: 100vh;
 	grid-template-columns: [col] auto [col] 150px;
 	grid-template-rows: [row] 50px [row] 5px [row] auto [row] 50px;
 }

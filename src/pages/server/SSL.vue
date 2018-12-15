@@ -3,8 +3,8 @@
 		<div v-if="error" v-text="error" class="error"/>
 		<form v-if="info" @submit.prevent="submit" @reset.prevent="reset">
 			<div>
-				<label for="key">Private key:</label>
-				<label for="cert">Certificate:</label>
+				<label for="key"><sup>*</sup>Private key:</label>
+				<label for="cert"><sup>*</sup>Certificate:</label>
 			</div>
 			<div>
 				<textarea id="key" v-model="key"></textarea>
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { SSL as query, EditSSL as mutation } from '../graphql/SSL.gql'
+import { SSL as query, EditSSL as mutation } from '../../graphql/SSL.gql'
 
 export default {
 	data: () => ({
@@ -88,13 +88,8 @@ form div {
 	justify-content: space-between;
 }
 textarea {
-	display: inline-block;
-	width: calc(100% - 16px);
-	resize: none;
-	overflow: auto;
 	height: 370px;
-	padding: 7px;
-	border: 1px solid #ccc;
+	font-size: 11px;
 }
 label {
 	padding-bottom: 10px;

@@ -1,5 +1,14 @@
 <template>
-	<button @click="click" :class="`btn${active ? ' hightlight' : ''}`" :disabled="active" :value="page">{{ page }}</button>
+	<span>
+		<button v-if="active" class="btn hightlight" disabled>{{ page }}</button>
+		<router-link
+			class="btn"
+			v-if="!active"
+			:to="{ query }"
+		>
+			{{ page }}
+		</router-link>
+	</span>
 </template>
 
 <script>
@@ -15,15 +24,25 @@ export default {
 			default: false
 		}
 	},
-	methods: {
-		click({ target: { value } }) {
-			this.$parent.$emit('paginate', parseFloat(value))
+	computed: {
+		query() {
+			const { page } = this
+			const query = Object.assign({}, this.$route.query)
+
+			delete query.page
+
+			if (!page) return null
+
+			if (page === 1) return query
+
+			return Object.assign(query, { page })
 		}
 	}
 }
 </script>
 
 <style scoped>
+a,
 button {
 	padding: 5px 10px;
 }

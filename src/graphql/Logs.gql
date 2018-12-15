@@ -1,7 +1,19 @@
-query ServerLog($type: String, $input: GetServerLog) {
-	serverLog(type: $type, input: $input)
+query ErrorsLog($input: GetServerLog) {
+	serverLog(type: "errors", input: $input)
 }
 
-mutation ClearServerLog($type: String = "errors") {
-	_clearServerLog(type: $type)
+query QueriesLog($input: GetServerLog) {
+	serverLog(type: "queries", input: $input)
+}
+
+query ViewLogRow($type: String = "errors", $date: String) {
+	serverLog(type: $type, input: { date: [$date] })
+}
+
+mutation ClearErrorsLog {
+	_clearServerLog(type: "errors")
+}
+
+mutation ClearQueriesLog {
+	_clearServerLog(type: "queries")
 }

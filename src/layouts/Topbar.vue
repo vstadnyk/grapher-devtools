@@ -6,27 +6,29 @@
 
 <script>
 export default {
-	name: 'Topbar',
 	data: () => ({
 		title: null
 	}),
 	watch: {
-		$route({ name, meta: { title } }) {
-			this.setTitle(title || name)
+		$route(route) {
+			this.setTitle(route)
 		}
 	},
 	created() {
-		this.setTitle(this.$route.meta.title || this.$route.name)
+		this.setTitle(this.$route)
 	},
 	methods: {
-		setTitle(title = null) {
-			this.title = title
-			document.title = `${title} | Grapher`
+		setTitle({ matched }) {
+			this.title = matched
+				.map(({ meta: { title = null } = {} }) => title)
+				.filter(row => row)
+				.join(' ➠ ')
+
+			document.title = this.title.concat(this.title ? ' | ' : '').concat('Grapher')
 		}
 	}
 }
 </script>
-
 
 <style scoped>
 section {
@@ -39,7 +41,6 @@ section {
 h1 {
 	margin: 0;
 	display: inline-block;
-	text-transform: capitalize;
 	color: #a0a0a0;
 	font-weight: normal;
 }

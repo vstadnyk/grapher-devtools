@@ -1,0 +1,115 @@
+query PushData {
+	pushTemplateData
+}
+
+query PushTemplates($input: GetPushTemplateInput) {
+	pushTemplates_i18n(input: $input) {
+		count
+		rows {
+			id
+			title {
+				lang
+				value
+			}
+			body {
+				lang
+				value
+			}
+			event
+			app
+			platform
+			active
+		}
+	}
+}
+
+query PushTemplate($input: GetPushTemplateInput) {
+	pushTemplate_i18n(input: $input) {
+		id
+		title {
+			lang
+			value
+		}
+		body {
+			lang
+			value
+		}
+		event
+		app
+		platform
+		active
+	}
+}
+
+mutation AddPushTemplate($input: PushTemplateInput) {
+	_addPushTemplate(input: $input)
+}
+
+mutation EditPushTemplate($id: ID!, $input: PushTemplateInput) {
+	_editPushTemplate(id: $id, input: $input)
+}
+
+mutation RemovePushTemplateByID($id: [ID]!) {
+	_removePushTemplate(id: $id)
+}
+
+query PushTemplate_i18n($input: GetPushTemplateInput) {
+	pushTemplate_i18n(input: $input) {
+		id
+		title {
+			lang
+			value
+		}
+		body {
+			lang
+			value
+		}
+		event
+		app
+		platform
+		active
+	}
+}
+
+query PushSubscribers($input: GetSubscribePushInput) {
+	pushSubscribers(input: $input) {
+		count
+		rows {
+			id
+			event
+			user
+			app
+			platform
+			lang
+			active
+		}
+	}
+}
+
+query PushSubscriberUsers($id: [ID]) {
+	users(input: {
+		id: $id
+	}) {
+		rows {
+			id
+			fullName
+		}
+	}
+}
+
+query PushSubscriber($id: ID) {
+	pushSubscriber(input: { id: [$id] }) {
+		id
+		token
+		event
+		user
+		app
+		platform
+		lang
+		active
+	}
+}
+
+mutation RemoveSubscribersByID($id: [ID]) {
+	_removeSubscribePush(input: { id: $id })
+}

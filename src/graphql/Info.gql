@@ -18,6 +18,12 @@ query ServerTime {
 	}
 }
 
+query ServerLocales {
+	serverInfo {
+		locales
+	}
+}
+
 query ServerInfo {
 	serverInfo {
 		name

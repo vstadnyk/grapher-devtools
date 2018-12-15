@@ -1,6 +1,6 @@
 <template>
 	<header>
-		<a href="/">Grapher</a>
+		<router-link to="/">Grapher</router-link>
 		<i v-if="version">{{ version }}</i>
 	</header>
 </template>

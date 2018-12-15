@@ -8,7 +8,9 @@ export default new Vuex.Store({
 		isLogin: null,
 		isOnline: true,
 		user: null,
-		serverTime: null
+		serverTime: null,
+		serverLocales: null,
+		pushTemplateData: null
 	},
 	getters: {
 		accessToken() {
@@ -16,6 +18,11 @@ export default new Vuex.Store({
 		},
 		refreshToken() {
 			return localStorage.getItem('RefreshToken')
+		},
+		lang(state = {}) {
+			const { default: def = 'en' } = state.serverLocales || {}
+
+			return def
 		}
 	},
 	mutations: {
@@ -55,6 +62,12 @@ export default new Vuex.Store({
 		},
 		setServerTime(state, serverTime) {
 			Object.assign(state, { serverTime })
+		},
+		setServerLocales(state, serverLocales) {
+			Object.assign(state, { serverLocales })
+		},
+		setPushTemplateData(state, pushTemplateData) {
+			Object.assign(state, { pushTemplateData })
 		}
 	},
 	actions: {}

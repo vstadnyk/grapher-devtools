@@ -1,7 +1,15 @@
 <template>
-	<ul v-if="count && pages > 1">
-		<li v-for="(value, page) in new Array(pages)" :key="page">
-			<PaginationItem :page="page + 1" :active="page + 1 === current" />
+	<ul v-if="count && count > limit">
+		<li>
+			<PaginationItem :page="1" :active="current === 1" />
+		</li>
+		<li v-if="!chunk.find(r => r === 2)">...</li>
+		<li v-for="page in chunk" :key="page">
+			<PaginationItem :page="page" :active="page === current" />
+		</li>
+		<li v-if="!chunk.find(r => r === pages) && !chunk.find(r => r === pages - 1)">...</li>
+		<li v-if="!chunk.find(r => r === pages)">
+			<PaginationItem :page="pages" :active="pages === current" />
 		</li>
 	</ul>
 </template>
@@ -24,18 +32,51 @@ export default {
 		limit: {
 			type: Number,
 			default: 10
+		},
+		chunkSize: {
+			type: Number,
+			default: 5
 		}
 	},
-	created() {
-		const { count, limit } = this
+	watch: {
+		$route({ query: { page = null } } = {}) {
+			this.current = parseInt(page, 0) || 1
+		},
+		limit() {
+			this.calc()
+		},
+		count() {
+			this.calc()
+		}
+	},
+	computed: {
+		chunk() {
+			let step = 2
 
-		this.pages = Math.ceil(count / limit)
+			const max = this.pages - this.chunkSize + 1
 
-		this.$on('paginate', page => {
-			this.current = page
+			if (this.chunkSize - this.current <= 0) step += this.current - this.chunkSize
 
-			this.$parent.$emit('paginate', page)
-		})
+			if (step >= max) step = max
+
+			if (this.limit === 1) step -= 1
+			if (this.limit === 1 && this.current !== 1) step -= 1
+
+			const chunk = Object.keys(new Array(this.chunkSize).fill(0)).map(
+				r => parseInt(r, 0) + step
+			)
+
+			return chunk.filter(r => r > 1)
+		}
+	},
+	methods: {
+		calc() {
+			this.pages = Math.ceil(this.count / this.limit)
+
+			const { page = 1 } = this.$route.query
+
+			this.current = parseInt(page, 0)
+		}
 	}
 }
 </script>
@@ -49,6 +90,7 @@ li {
 }
 ul {
 	margin: 0 -3px;
+	display: inline-block;
 }
 li {
 	display: inline-block;

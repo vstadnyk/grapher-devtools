@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import mainmenu from '../components/Menu.vue'
-import SideBarTitle from '../components/SideBarTitle.vue'
+import mainmenu from './Menu.vue'
+import SideBarTitle from './SideBarTitle.vue'
 
 export default {
 	name: 'Sidebar',

@@ -30,9 +30,9 @@
 </template>
 
 <script>
-import { AuthInfo, AuthTokenInfo, AuthUser } from '../graphql/User.gql'
-import Form from '../controllers/form'
-import Viewer from '../components/ui/Viewer.vue'
+import { AuthInfo, AuthTokenInfo, AuthUser } from '../../graphql/User.gql'
+import Form from '../../controllers/form'
+import Viewer from '../../components/Viewer.vue'
 
 export default {
 	components: { Viewer },
