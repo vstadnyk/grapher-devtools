@@ -10,10 +10,21 @@ query ViewLogRow($type: String = "errors", $date: String) {
 	serverLog(type: $type, input: { date: [$date] })
 }
 
-mutation ClearErrorsLog {
-	_clearServerLog(type: "errors")
+query LogInfo {
+	errors: serverLog(
+		type: "errors"
+		input: {
+			params: { limit: 1, offset: 0, order: { column: "date", sort: "DESC" } }
+		}
+	)
+	queries: serverLog(
+		type: "queries"
+		input: {
+			params: { limit: 1, offset: 0, order: { column: "date", sort: "DESC" } }
+		}
+	)
 }
 
-mutation ClearQueriesLog {
-	_clearServerLog(type: "queries")
+mutation ClearLog($type: String = "errors") {
+	_clearServerLog(type: $type)
 }

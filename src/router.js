@@ -99,14 +99,6 @@ export default new Router({
 								}
 							]
 						}
-						/* {
-							path: '/server/logs/notifications',
-							menu: 'Notifications',
-							meta: {
-								title: 'Notifications'
-							},
-							component: load('server/logs/Notifications')
-						} */
 					]
 				}
 			]
@@ -184,27 +176,5 @@ export default new Router({
 				}
 			]
 		}
-		/* {
-			path: '/users',
-			menu: 'Users',
-			meta: {
-				title: 'Users'
-			},
-			component: load('users/index'),
-			children: [
-				{
-					path: '',
-					component: load('users/list')
-				},
-				{
-					path: '/users/jwt',
-					menu: 'JWT',
-					meta: {
-						title: 'JWT Authorization'
-					},
-					component: load('users/AuthJWT')
-				}
-			]
-		} */
 	]
 })

@@ -6,6 +6,7 @@
 			:fields="fields"
 			:input="input"
 			:options="options"
+			:filter="filter"
 		/>
 		<router-view />
 	</section>
@@ -15,6 +16,8 @@
 import Table from '../../../components/ui/Table/index.vue'
 
 import { ErrorsLog } from '../../../graphql/Logs.gql'
+
+import Form from '../../../controllers/form'
 
 export default {
 	components: { Table },
@@ -59,6 +62,19 @@ export default {
 			limitStep: 10,
 			idKey: 'date'
 		}
-	})
+	}),
+	computed: {
+		filter() {
+			const { apptype = null, appplatform = null } = this.$store.state.instance || {}
+
+			return {
+				type: true,
+				date: true,
+				operationName: true,
+				apptype: apptype ? Form.arrayToObject(apptype) : true,
+				appplatform: appplatform ? Form.arrayToObject(appplatform) : true
+			}
+		}
+	}
 }
 </script>

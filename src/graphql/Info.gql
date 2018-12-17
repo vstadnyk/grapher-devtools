@@ -9,6 +9,7 @@ mutation MutationTest($text: String) {
 query ServerVersion {
 	serverInfo {
 		version
+		instance
 	}
 }
 

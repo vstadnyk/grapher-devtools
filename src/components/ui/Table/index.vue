@@ -10,7 +10,7 @@
 					<th
 						v-for="[column, { sortable, name }] in Object.entries(fields)"
 						:key="column"
-						:class="sortable ? 'sortable' : null"
+						:valign="filter[column] ? 'top' : 'middle'"
 					>
 						<router-link v-if="sortable" :to="{
 							query: Object.assign({}, $route.query, {
@@ -25,6 +25,12 @@
 						</router-link>
 
 						{{ !sortable ? name || column : '' }}
+
+						<FilterRows
+							v-if="filter[column]"
+							:datalist="filter[column]"
+							:name="column"
+						/>
 					</th>
 					<th v-if="Object.keys(actions).length" width="1" />
 				</tr>
@@ -79,13 +85,15 @@ import Pagination from '../Pagination/list.vue'
 import Limiter from '../Limiter.vue'
 import cell from './cell.vue'
 import actions from './actions.vue'
+import FilterRows from './filter.vue'
 
 export default {
-	components: { Pagination, cell, actions, Limiter },
+	components: { Pagination, cell, actions, FilterRows, Limiter },
 	data: () => ({
 		error: null,
 		count: null,
 		rows: null,
+		filterInput: {},
 		selected: []
 	}),
 	props: {
@@ -108,6 +116,10 @@ export default {
 			default: () => ({ id: { name: 'ID', sortable: true, asLinkView: false } })
 		},
 		fieldHooks: {
+			type: Object,
+			default: () => ({})
+		},
+		filter: {
 			type: Object,
 			default: () => ({})
 		},
@@ -171,8 +183,10 @@ export default {
 		this.$on('limiter', limit => this.setLimit(limit))
 	},
 	watch: {
-		$route({ query: { column = null, sort = null, page = 1 } } = {}) {
+		async $route({ query: { column = null, sort = null, page = 1, filter = null } } = {}) {
 			this.setPage(page)
+
+			this.setFilter(filter)
 
 			this.setOrder(
 				Object.assign({}, this.order, {
@@ -182,17 +196,21 @@ export default {
 			)
 
 			this.error = null
+
+			await this.getData()
 		}
 	},
 	methods: {
 		async getData() {
-			const { query, input } = this
+			const { query, input, filterInput } = this
 			this.error = null
 
 			this.$root.$app.$emit('loader', 'start')
 
 			try {
-				const data = await this.$api.query(query, { input })
+				const data = await this.$api.query(query, {
+					input: Object.assign({}, filterInput, input)
+				})
 
 				this.$root.$app.$emit('loader', 'done')
 
@@ -254,26 +272,31 @@ export default {
 			this.input.params.limit = limit
 
 			this.setPage(1)
-
-			this.getData()
 		},
 		setOrder(order = null) {
 			const { query } = this.$route
 
-			if (order) this.input.params.order = order
+			if (order && order.sort) this.input.params.order = order
 
 			if (query.sort && !order) this.input.params.order = query
 
-			if (!query.sort) {
+			if (!query.sort && this.input.params.order) {
 				this.$router.push({
 					query: Object.assign({}, this.$route.query, this.input.params.order)
 				})
 			}
-
-			this.getData()
 		},
 		setPage(page = 1) {
 			this.input.params.offset = (page - 1) * this.input.params.limit
+		},
+		setFilter(filter) {
+			this.filterInput = {}
+
+			try {
+				Object.assign(this.filterInput, JSON.parse(filter))
+			} catch (error) {
+				console.error('Filter is not valid', error)
+			}
 		},
 		getId(item) {
 			const { idKey = 'id' } = this.options || {}
@@ -285,8 +308,7 @@ export default {
 </script>
 
 <style scoped>
-th.sortable {
-	user-select: none;
+th a {
 	white-space: nowrap;
 }
 tfoot p {

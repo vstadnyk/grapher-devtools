@@ -8,6 +8,7 @@ export default new Vuex.Store({
 		isLogin: null,
 		isOnline: true,
 		user: null,
+		instance: null,
 		serverTime: null,
 		serverLocales: null,
 		pushTemplateData: null
@@ -59,6 +60,9 @@ export default new Vuex.Store({
 		},
 		setUser(state, user) {
 			Object.assign(state, { user })
+		},
+		setInstance(state, instance) {
+			Object.assign(state, { instance })
 		},
 		setServerTime(state, serverTime) {
 			Object.assign(state, { serverTime })

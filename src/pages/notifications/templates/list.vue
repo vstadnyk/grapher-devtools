@@ -13,6 +13,7 @@
 			:query="query"
 			:fields="fields"
 			:actions="actions"
+			:filter="filter"
 		/>
 	</section>
 </template>
@@ -20,6 +21,8 @@
 <script>
 import Table from '../../../components/ui/Table/index.vue'
 import { PushTemplates, RemovePushTemplateByID } from '../../../graphql/Push.gql'
+
+import Form from '../../../controllers/form'
 
 export default {
 	components: { Table },
@@ -46,20 +49,17 @@ export default {
 			event: {
 				name: 'Event',
 				sortable: true,
-				align: 'center',
-				width: '1'
+				align: 'center'
 			},
 			app: {
 				name: 'App',
 				sortable: true,
-				align: 'center',
-				width: '1'
+				align: 'center'
 			},
 			platform: {
 				name: 'Platform',
 				sortable: true,
-				align: 'center',
-				width: '1'
+				align: 'center'
 			},
 			active: {
 				name: 'Enabled',
@@ -76,7 +76,23 @@ export default {
 				query: RemovePushTemplateByID
 			}
 		}
-	})
+	}),
+	async created() {
+		if (!this.$store.state.pushTemplateData) await this.$parent.$parent.getData()
+	},
+	computed: {
+		filter() {
+			const { apptype = null, appplatform = null } = this.$store.state.instance || {}
+
+			const { events = null } = this.$store.state.pushTemplateData || {}
+
+			return {
+				event: events ? Form.arrayToObject(events) : true,
+				app: apptype ? Form.arrayToObject(apptype) : true,
+				platform: appplatform ? Form.arrayToObject(appplatform) : true
+			}
+		}
+	}
 }
 </script>
 

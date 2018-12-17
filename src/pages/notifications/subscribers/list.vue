@@ -1,9 +1,11 @@
 <template>
 	<section>
 		<Table
+			ref="table"
 			:query="query"
 			:fields="fields"
 			:actions="actions"
+			:filter="filter"
 			:data-hook="join"
 		/>
 	</section>
@@ -17,6 +19,8 @@ import {
 	PushSubscriberUsers
 } from '../../../graphql/Push.gql'
 
+import Form from '../../../controllers/form'
+
 export default {
 	components: { Table },
 	data: () => ({
@@ -28,38 +32,39 @@ export default {
 				width: '1',
 				align: 'center'
 			},
-			user: {
-				name: 'User ID',
-				sortable: true,
-				width: '1',
-				align: 'center'
-			},
 			userFullName: {
 				name: 'User Full name',
 				sortable: false,
 				link: '/notifications/subscribers/view/'
 			},
-			event: {
+			user: {
+				name: 'User ID',
 				sortable: true,
-				width: '1',
+				align: 'center'
+			},
+			event: {
+				name: 'Event',
+				sortable: true,
 				align: 'center'
 			},
 			app: {
+				name: 'App',
 				sortable: true,
-				width: '1',
 				align: 'center'
 			},
 			platform: {
+				name: 'platform',
 				sortable: true,
-				width: '1',
 				align: 'center'
 			},
 			lang: {
+				name: 'Lang',
 				sortable: true,
 				width: '1',
 				align: 'center'
 			},
 			active: {
+				name: 'Enabled',
 				sortable: true,
 				width: '1',
 				align: 'center'
@@ -71,6 +76,25 @@ export default {
 			}
 		}
 	}),
+	computed: {
+		filter() {
+			const { apptype = null, appplatform = null } = this.$store.state.instance || {}
+
+			const { events = null } = this.$store.state.pushTemplateData || {}
+
+			return {
+				user: true,
+				event: events ? Form.arrayToObject(events) : true,
+				app: apptype ? Form.arrayToObject(apptype) : true,
+				platform: appplatform ? Form.arrayToObject(appplatform) : true
+			}
+		}
+	},
+	async created() {
+		if (!this.$store.state.pushTemplateData) await this.$parent.$parent.getData()
+
+		if (this.$refs.table) await this.$refs.table.getData()
+	},
 	methods: {
 		async join({ count, rows } = {}) {
 			if (!count) return { count, rows }

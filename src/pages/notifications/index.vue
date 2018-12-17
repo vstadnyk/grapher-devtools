@@ -6,6 +6,8 @@
 </template>
 
 <script>
+import { PushData } from '../../graphql/Push.gql'
+
 export default {
 	data: () => ({
 		error: null
@@ -23,6 +25,21 @@ export default {
 
 			this.$parent.$emit('loader', 'done')
 		})
+	},
+	methods: {
+		async getData() {
+			this.$root.$app.$emit('loader', 'start')
+
+			try {
+				const { pushTemplateData } = await this.$api.query(PushData)
+
+				this.$root.$app.$emit('loader', 'done')
+
+				this.$store.commit('setPushTemplateData', pushTemplateData)
+			} catch (error) {
+				this.$parent.$emit('error', error)
+			}
+		}
 	}
 }
 </script>

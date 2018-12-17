@@ -15,11 +15,12 @@ export default {
 	}),
 	async created() {
 		try {
-			const {
-				serverInfo: { version }
-			} = await this.$api.query({ query })
+			const { serverInfo: { version = null, instance = null } = {} } =
+				(await this.$api.query({ query })) || {}
 
 			this.version = version
+
+			this.$store.commit('setInstance', instance)
 		} catch (error) {
 			console.error(error)
 		}

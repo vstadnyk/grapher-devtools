@@ -13,27 +13,13 @@
 <script>
 import Viewer from '../../components/Viewer.vue'
 
-import { PushData } from '../../graphql/Push.gql'
-
 export default {
 	components: { Viewer },
 	data: () => ({
 		info: null
 	}),
 	async created() {
-		if (!this.$store.state.pushTemplateData) {
-			this.$root.$app.$emit('loader', 'start')
-
-			try {
-				const { pushTemplateData } = await this.$api.query(PushData)
-
-				this.$root.$app.$emit('loader', 'done')
-
-				this.$store.commit('setPushTemplateData', pushTemplateData)
-			} catch (error) {
-				this.$parent.$emit('error', error)
-			}
-		}
+		if (!this.$store.state.pushTemplateData) await this.$parent.getData()
 
 		const { pushTemplateData } = this.$store.state
 

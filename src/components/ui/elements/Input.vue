@@ -57,7 +57,7 @@ export default {
 			default: null
 		},
 		datalist: {
-			type: Object,
+			type: null,
 			default: null
 		},
 		type: {
