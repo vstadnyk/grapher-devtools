@@ -41,6 +41,16 @@ query PushTemplate($input: GetPushTemplateInput) {
 	}
 }
 
+query PushAutoTemplates {
+	pushTemplates {
+		rows {
+			event
+			app
+			platform
+		}
+	}
+}
+
 mutation AddPushTemplate($input: PushTemplateInput) {
 	_addPushTemplate(input: $input)
 }

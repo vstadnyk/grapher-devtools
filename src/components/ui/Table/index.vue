@@ -1,6 +1,7 @@
 <template>
 	<div>
 		<p v-if="error" v-text="error" class="error" />
+		<Search v-if="Object.keys(searchFields).length" :fields="searchFields" />
 		<table>
 			<thead>
 				<tr>
@@ -10,7 +11,7 @@
 					<th
 						v-for="[column, { sortable, name }] in Object.entries(fields)"
 						:key="column"
-						:valign="filter[column] ? 'top' : 'middle'"
+						:valign="filter[column] && !searchFields[column] ? 'top' : 'middle'"
 					>
 						<router-link v-if="sortable" :to="{
 							query: Object.assign({}, $route.query, {
@@ -27,8 +28,8 @@
 						{{ !sortable ? name || column : '' }}
 
 						<FilterRows
-							v-if="filter[column]"
-							:datalist="filter[column]"
+							v-if="!searchFields[column] && filter[column]"
+							:data="filter[column]"
 							:name="column"
 						/>
 					</th>
@@ -86,14 +87,17 @@ import Limiter from '../Limiter.vue'
 import cell from './cell.vue'
 import actions from './actions.vue'
 import FilterRows from './filter.vue'
+import Search from './search.vue'
 
 export default {
-	components: { Pagination, cell, actions, FilterRows, Limiter },
+	components: { Pagination, cell, actions, FilterRows, Limiter, Search },
 	data: () => ({
 		error: null,
+		fetched: null,
 		count: null,
 		rows: null,
 		filterInput: {},
+		searchInput: {},
 		selected: []
 	}),
 	props: {
@@ -113,7 +117,7 @@ export default {
 		},
 		fields: {
 			type: Object,
-			default: () => ({ id: { name: 'ID', sortable: true, asLinkView: false } })
+			default: () => ({ id: { name: 'ID', sortable: true } })
 		},
 		fieldHooks: {
 			type: Object,
@@ -167,6 +171,14 @@ export default {
 		},
 		showCheckboxes() {
 			return !!Object.keys(this.fields).find(field => field === 'id')
+		},
+		searchFields() {
+			return Object.assign(
+				{},
+				...Object.entries(this.filter)
+					.filter(([i, { searchable = null }]) => i && searchable)
+					.map(([i, v]) => ({ [i]: v }))
+			)
 		}
 	},
 	created() {
@@ -180,13 +192,20 @@ export default {
 			this.remove()
 		})
 
-		this.$on('limiter', limit => this.setLimit(limit))
+		this.$on('limiter', limit => {
+			this.setLimit(limit)
+			this.getData()
+		})
+
+		if (!this.fetched) this.getData()
 	},
 	watch: {
-		async $route({ query: { column = null, sort = null, page = 1, filter = null } } = {}) {
+		async $route({
+			query: { column = null, sort = null, page = 1, filter = null, search = null }
+		} = {}) {
 			this.setPage(page)
-
 			this.setFilter(filter)
+			this.setSearch(search)
 
 			this.setOrder(
 				Object.assign({}, this.order, {
@@ -202,10 +221,17 @@ export default {
 	},
 	methods: {
 		async getData() {
-			const { query, input, filterInput } = this
+			const { query, input, filterInput, searchInput: search = {} } = this
 			this.error = null
+			this.fetched = true
 
 			this.$root.$app.$emit('loader', 'start')
+
+			if (Object.values(search).length) {
+				Object.assign(input.params, { search })
+			} else {
+				delete input.params.search
+			}
 
 			try {
 				const data = await this.$api.query(query, {
@@ -225,7 +251,7 @@ export default {
 				this.count = count
 				this.rows = rows
 			} catch (error) {
-				this.error = error.type
+				this.error = error.type.concat(': ', error.message)
 
 				this.$root.$app.$emit('loader', 'done')
 
@@ -254,8 +280,10 @@ export default {
 
 				this.$root.$app.$emit('loader', 'done')
 
-				this.rows = this.rows.filter(row => !this.selected.find(id => id === row.id))
-				this.count = this.count - this.selected.length
+				/* this.rows = this.rows.filter(row => !this.selected.find(id => id === row.id))
+				this.count = this.count - this.selected.length */
+
+				await this.getData()
 			} catch (error) {
 				this.error = error.type
 
@@ -273,12 +301,13 @@ export default {
 
 			this.setPage(1)
 		},
-		setOrder(order = null) {
+		setOrder({ column = null, sort = null } = {}) {
 			const { query } = this.$route
 
-			if (order && order.sort) this.input.params.order = order
+			if (column && sort) this.input.params.order = { column, sort }
 
-			if (query.sort && !order) this.input.params.order = query
+			if (query.sort && !sort)
+				this.input.params.order = { column: query.column, sort: query.sort }
 
 			if (!query.sort && this.input.params.order) {
 				this.$router.push({
@@ -296,6 +325,15 @@ export default {
 				Object.assign(this.filterInput, JSON.parse(filter))
 			} catch (error) {
 				console.error('Filter is not valid', error)
+			}
+		},
+		setSearch(search) {
+			this.searchInput = {}
+
+			try {
+				Object.assign(this.searchInput, JSON.parse(search))
+			} catch (error) {
+				console.error('Search is not valid', error)
 			}
 		},
 		getId(item) {

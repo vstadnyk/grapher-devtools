@@ -6,6 +6,7 @@
 			:fields="fields"
 			:input="input"
 			:options="options"
+			:filter="filter"
 		/>
 		<router-view />
 	</section>
@@ -32,26 +33,44 @@ export default {
 		},
 		fields: {
 			date: {
+				name: 'Datetime',
 				sortable: true,
-				link: '/server/logs/queries/view/'
+				link: '/server/logs/queries/view/',
+				width: '25%'
 			},
 			apptype: {
+				name: 'App',
 				sortable: true,
-				align: 'center'
+				align: 'center',
+				width: '25%'
 			},
 			appplatform: {
+				name: 'Platform',
 				sortable: true,
-				align: 'center'
+				align: 'center',
+				width: '25%'
 			},
 			operationName: {
+				name: 'Operation',
 				sortable: true,
-				align: 'center'
+				align: 'center',
+				width: '25%'
 			}
 		},
 		options: {
 			limitStep: 5,
 			idKey: 'date'
 		}
-	})
+	}),
+	computed: {
+		filter() {
+			const { apptype = null, appplatform = null } = this.$store.state.instance || {}
+
+			return {
+				apptype: { validType: String, select: apptype },
+				appplatform: { validType: String, select: appplatform }
+			}
+		}
+	}
 }
 </script>

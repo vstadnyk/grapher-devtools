@@ -1,0 +1,15 @@
+query Constants($input: GetConfigInput) {
+	configs(input: $input) {
+		count
+		rows {
+			id
+			name
+			key
+			active
+		}
+	}
+}
+
+mutation RemoveConstantByID($id: ID!) {
+	_removeConfig(id: [$id])
+}

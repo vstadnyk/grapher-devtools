@@ -19,7 +19,7 @@ export default {
 	},
 	created() {
 		this.$on('error', error => {
-			this.error = error.type
+			this.error = (error.type || '').concat(': ', error.message)
 
 			console.error(error)
 

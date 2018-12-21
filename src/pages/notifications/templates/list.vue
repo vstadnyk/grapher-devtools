@@ -22,8 +22,6 @@
 import Table from '../../../components/ui/Table/index.vue'
 import { PushTemplates, RemovePushTemplateByID } from '../../../graphql/Push.gql'
 
-import Form from '../../../controllers/form'
-
 export default {
 	components: { Table },
 	data: () => ({
@@ -87,9 +85,11 @@ export default {
 			const { events = null } = this.$store.state.pushTemplateData || {}
 
 			return {
-				event: events ? Form.arrayToObject(events) : true,
-				app: apptype ? Form.arrayToObject(apptype) : true,
-				platform: appplatform ? Form.arrayToObject(appplatform) : true
+				title: { searchable: String },
+				body: { searchable: String },
+				event: { validType: String, select: events },
+				app: { validType: String, select: apptype },
+				platform: { validType: String, select: appplatform }
 			}
 		}
 	}

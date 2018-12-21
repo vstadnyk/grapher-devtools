@@ -35,4 +35,34 @@ export default class {
 			{}
 		)
 	}
+
+	static validator(typeObj, value, list = null) {
+		let val = value
+
+		const type = (typeObj.name || 'none').toLowerCase()
+
+		if (type === 'number') {
+			val = typeObj(val)
+
+			if (Number.isNaN(val))
+				throw new Error(`The specified value "${value}" is not a valid ${type}`)
+		}
+
+		if (type === 'string') {
+			if (typeof val !== 'string')
+				throw new Error(`The specified value "${value}" is not a valid ${type}`)
+
+			val = typeObj(val)
+		}
+
+		if (val && list) {
+			if (
+				(Array.isArray(list) && !list.find(r => r === val)) ||
+				!Object.values(list).find(r => r === val)
+			)
+				throw new Error(`The specified value "${value}" is not in list`)
+		}
+
+		return val
+	}
 }

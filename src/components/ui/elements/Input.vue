@@ -6,7 +6,7 @@
 			v-model="model"
 			:id="id"
 			:list="datalist ? `${id}-list` : null"
-			:type="type"
+			:type="inputType === 'string' ? 'text' : inputType"
 			:name="name"
 			:lang="lang"
 			:required="required"
@@ -14,6 +14,7 @@
 			:step="step"
 			:min="min"
 			:max="max"
+			:class="(cssClass || '').concat(error ? ' error' : '') || null"
 		>
 		<datalist v-if="datalist" :id="`${id}-list`">
 			<option
@@ -24,26 +25,52 @@
 				{{ text }}
 			</option>
 		</datalist>
+		<span v-if="error" class="error">{{ error }}</span>
 	</label>
 </template>
 
 <script>
+import Form from '../../../controllers/form'
+
 export default {
 	data: () => ({
-		val: null
+		val: null,
+		error: null
 	}),
 	computed: {
 		model: {
 			get() {
 				return this.val || this.value
 			},
-			set(value) {
-				this.$parent.$emit(
-					`${this.id || this.name}Change`,
-					this.lang ? { lang: this.lang, value } : value
-				)
+			set(val) {
+				this.val = val
 
-				this.val = value
+				const value = this.validate()
+
+				const data = this.lang ? { lang: this.lang, value } : value
+
+				this.$emit('change', data)
+			}
+		},
+		inputType() {
+			if (this.type === 'search') return this.type
+			if (this.validType) return this.validType.name.toLowerCase()
+
+			return this.type
+		}
+	},
+	methods: {
+		validate(value = null) {
+			if (!this.validType) return null
+
+			if (this.required && !value) this.error = 'This field is required'
+
+			try {
+				return Form.validator(this.validType, value || this.val)
+			} catch ({ message: error }) {
+				this.error = error
+
+				return null
 			}
 		}
 	},
@@ -64,6 +91,10 @@ export default {
 			type: String,
 			default: 'text'
 		},
+		validType: {
+			type: null,
+			default: null
+		},
 		name: {
 			type: String,
 			default: null
@@ -73,7 +104,7 @@ export default {
 			default: null
 		},
 		value: {
-			type: String,
+			type: null,
 			default: null
 		},
 		required: {
@@ -95,6 +126,10 @@ export default {
 		max: {
 			type: Number,
 			default: null
+		},
+		cssClass: {
+			type: String,
+			default: null
 		}
 	}
 }
@@ -114,5 +149,14 @@ input {
 sup {
 	color: red;
 	padding-right: 3px;
+}
+input.error {
+	border-color: red;
+	color: inherit;
+}
+span.error {
+	font-weight: normal;
+	display: block;
+	margin-top: 5px;
 }
 </style>

@@ -17,8 +17,6 @@ import Table from '../../../components/ui/Table/index.vue'
 
 import { ErrorsLog } from '../../../graphql/Logs.gql'
 
-import Form from '../../../controllers/form'
-
 export default {
 	components: { Table },
 	data: () => ({
@@ -35,27 +33,34 @@ export default {
 		},
 		fields: {
 			type: {
+				name: 'Error type',
 				sortable: true,
-				link: '/server/logs/errors/view/'
+				link: '/server/logs/errors/view/',
+				width: '20%'
 			},
 			date: {
+				name: 'Date',
 				sortable: true,
-				align: 'center'
+				align: 'center',
+				width: '20%'
 			},
 			apptype: {
+				name: 'App',
 				sortable: true,
-				width: '1',
-				align: 'center'
+				align: 'center',
+				width: '20%'
 			},
 			appplatform: {
+				name: 'Platform',
 				sortable: true,
-				width: '1',
-				align: 'center'
+				align: 'center',
+				width: '20%'
 			},
 			operationName: {
+				name: 'Operation',
 				sortable: true,
-				width: '1',
-				align: 'center'
+				align: 'center',
+				width: '20%'
 			}
 		},
 		options: {
@@ -68,11 +73,8 @@ export default {
 			const { apptype = null, appplatform = null } = this.$store.state.instance || {}
 
 			return {
-				type: true,
-				date: true,
-				operationName: true,
-				apptype: apptype ? Form.arrayToObject(apptype) : true,
-				appplatform: appplatform ? Form.arrayToObject(appplatform) : true
+				apptype: { validType: String, select: apptype },
+				appplatform: { validType: String, select: appplatform }
 			}
 		}
 	}

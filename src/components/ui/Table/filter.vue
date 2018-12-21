@@ -1,33 +1,55 @@
 <template>
 	<p>
 		<Input
-			type="search"
-			:datalist="datalist"
+			v-if="!list"
 			:name="name"
-			:id="name"
 			:value="value"
+			:type="type"
+			:validType="validType"
+			@change="setQuery"
+		/>
+		<Select
+			v-if="list"
+			:name="name"
+			:value="value"
+			:validType="validType"
+			:options="list"
+			@change="setQuery"
 		/>
 	</p>
 </template>
 
 <script>
 import Input from '../elements/Input.vue'
+import Select from '../elements/Select.vue'
 
 export default {
-	components: { Input },
+	components: { Input, Select },
 	props: {
-		datalist: {
-			type: null,
+		data: {
+			type: Object,
 			default: null
 		},
 		name: String
 	},
-	created() {
-		this.$on(`${this.name}Change`, this.setQuery)
-	},
+	data: () => ({
+		error: null,
+		val: null
+	}),
 	computed: {
 		value() {
 			return this.query[this.name] || null
+		},
+		validType() {
+			const { validType = String, searchable = null } = this.data
+
+			return searchable || validType
+		},
+		type() {
+			return 'text'
+		},
+		list() {
+			return this.data.select || null
 		},
 		query() {
 			try {
@@ -38,31 +60,31 @@ export default {
 		}
 	},
 	methods: {
-		setQuery(value) {
-			const { query } = this.$route
+		getRouteParam(value = null, key = 'filter') {
+			const params = JSON.parse(this.$route.query[key] || '{}')
 
-			const params = Object.entries(
-				Object.assign({}, this.query, {
+			delete params[this.name]
+
+			if (value)
+				Object.assign(params, {
 					[this.name]: value
 				})
-			).filter(([k, v]) => k && v)
 
-			const filter = params.length
-				? JSON.stringify(Object.assign(...params.map(([k, v]) => ({ [k]: v }))))
-				: null
+			return params
+		},
+		setQuery(value = null) {
+			const query = Object.assign({}, this.$route.query)
+			const filter = this.getRouteParam(value)
 
-			delete query.filter
+			Object.assign(query, { filter: JSON.stringify(filter) })
 
-			this.$router.push({
-				query: Object.assign({}, query, { filter })
-			})
+			if (!Object.values(filter).length) delete query.filter
 
-			if (!filter) this.$router.push({ query })
+			this.$router.push({ query })
 		}
 	}
 }
 </script>
-
 
 <style scoped>
 p {

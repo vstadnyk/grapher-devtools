@@ -1,7 +1,9 @@
 <template>
 	<section>
 		<div>
-			<h2>Push template data:</h2>
+			<p>
+				<Generator />
+			</p>
 			<Viewer v-if="info" :objectEntriesTable="info"/>
 		</div>
 		<div>
@@ -12,9 +14,10 @@
 
 <script>
 import Viewer from '../../components/Viewer.vue'
+import Generator from './generator.vue'
 
 export default {
-	components: { Viewer },
+	components: { Viewer, Generator },
 	data: () => ({
 		info: null
 	}),

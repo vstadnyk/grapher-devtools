@@ -1,7 +1,6 @@
 <template>
 	<section>
 		<Table
-			ref="table"
 			:query="query"
 			:fields="fields"
 			:actions="actions"
@@ -18,8 +17,6 @@ import {
 	RemoveSubscribersByID,
 	PushSubscriberUsers
 } from '../../../graphql/Push.gql'
-
-import Form from '../../../controllers/form'
 
 export default {
 	components: { Table },
@@ -53,7 +50,7 @@ export default {
 				align: 'center'
 			},
 			platform: {
-				name: 'platform',
+				name: 'Platform',
 				sortable: true,
 				align: 'center'
 			},
@@ -83,17 +80,15 @@ export default {
 			const { events = null } = this.$store.state.pushTemplateData || {}
 
 			return {
-				user: true,
-				event: events ? Form.arrayToObject(events) : true,
-				app: apptype ? Form.arrayToObject(apptype) : true,
-				platform: appplatform ? Form.arrayToObject(appplatform) : true
+				user: { validType: Number },
+				event: { validType: String, select: events },
+				app: { validType: String, select: apptype },
+				platform: { validType: String, select: appplatform }
 			}
 		}
 	},
 	async created() {
 		if (!this.$store.state.pushTemplateData) await this.$parent.$parent.getData()
-
-		if (this.$refs.table) await this.$refs.table.getData()
 	},
 	methods: {
 		async join({ count, rows } = {}) {

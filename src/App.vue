@@ -29,6 +29,7 @@ import Login from './layouts/Login.vue'
 import Loader from './components/Loader.vue'
 
 import { PingToken } from './graphql/User.gql'
+import { ServerLocales } from './graphql/Info.gql'
 
 import { ping as config } from '../config'
 
@@ -67,10 +68,21 @@ export default {
 			throw error
 		}
 	},
-	created() {
+	async created() {
 		this.$on('loader', (event = 'start') => {
 			if (this.$refs.Loader) this.$refs.Loader.$emit(event)
 		})
+
+		if (!this.$store.state.serverLocales) {
+			try {
+				const { serverInfo: { locales } = {} } =
+					(await this.$api.query(ServerLocales)) || {}
+
+				this.$store.commit('setServerLocales', locales)
+			} catch (error) {
+				console.error(error)
+			}
+		}
 	}
 }
 </script>

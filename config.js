@@ -1,5 +1,5 @@
 export const api = {
-	host: 'external-release.website',
+	host: 'localhost',
 	url: '/api',
 	ports: {
 		http: 3000,
