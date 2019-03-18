@@ -9,13 +9,9 @@
 			list="limiter-options"
 			v-model="value"
 			@change="change"
-		>
+		/>
 		<datalist id="limiter-options">
-			<option
-				v-for="i in list"
-				:key="i"
-				:value="i"
-			>
+			<option v-for="i in list" :key="i" :value="i">
 				{{ i }}
 			</option>
 		</datalist>

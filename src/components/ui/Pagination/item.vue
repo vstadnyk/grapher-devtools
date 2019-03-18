@@ -1,11 +1,7 @@
 <template>
 	<span>
 		<button v-if="active" class="btn hightlight" disabled>{{ page }}</button>
-		<router-link
-			class="btn"
-			v-if="!active"
-			:to="{ query }"
-		>
+		<router-link class="btn" v-if="!active" :to="{ query }">
 			{{ page }}
 		</router-link>
 	</span>

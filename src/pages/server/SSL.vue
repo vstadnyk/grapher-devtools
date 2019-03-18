@@ -1,100 +1,59 @@
 <template>
-	<section>
-		<div v-if="error" v-text="error" class="error"/>
-		<form v-if="info" @submit.prevent="submit" @reset.prevent="reset">
-			<div>
-				<label for="key"><sup>*</sup>Private key:</label>
-				<label for="cert"><sup>*</sup>Certificate:</label>
-			</div>
-			<div>
-				<textarea id="key" v-model="key"></textarea>
-				<textarea id="cert" v-model="cert"></textarea>
-			</div>
-			<p v-if="key !== info.key || cert !== info.cert" align="right">
-				<button class="btn" type="reset">Reset</button>
-				<button class="btn hightlight">Save</button>
-			</p>
-		</form>
-	</section>
+	<form @submit.prevent="$emit('submit')">
+		<div>
+			<Textarea
+				label="Private key"
+				required
+				name="key"
+				v-model="(data.ssl || {}).key"
+				:class="$style.field"
+			/>
+			<Textarea
+				label="Certificate"
+				required
+				name="cert"
+				v-model="(data.ssl || {}).cert"
+				:class="$style.field"
+			/>
+		</div>
+		<p><button class="btn hightlight">Save</button></p>
+	</form>
 </template>
 
 <script>
+import controller from '../../components/Form/controller'
+
 import { SSL as query, EditSSL as mutation } from '../../graphql/SSL.gql'
 
 export default {
+	mixins: [controller],
 	data: () => ({
-		info: null,
-		error: null,
-		key: null,
-		cert: null
+		query,
+		where: true,
+		fields: { ssl: { type: Object } }
 	}),
-	async created() {
-		this.$parent.$emit('loader', 'start')
-
-		this.error = null
-
-		try {
-			const {
-				serverInfo: { ssl: info }
-			} = await this.$api.query(query)
-
-			this.$parent.$emit('loader', 'done')
-
-			this.info = info
-			this.key = info.key
-			this.cert = info.cert
-		} catch (error) {
-			this.$parent.$emit('loader', 'done')
-
-			this.error = error.type
-
-			console.error(error)
-		}
-	},
 	methods: {
-		async submit() {
-			this.$parent.$emit('loader', 'start')
-			const { key, cert } = this
-
-			this.error = null
-
-			try {
-				const save = await this.$api.mutate(mutation, { key, cert })
-
-				if (save) this.info = { key, cert }
-
-				this.$parent.$emit('loader', 'done')
-			} catch (error) {
-				this.$parent.$emit('loader', 'done')
-
-				this.error = error.type
-
-				console.error(error)
-			}
-		},
-		reset() {
-			this.key = this.info.key
-			this.cert = this.info.cert
+		submit({ input: { ssl: { key, cert } = {} } }) {
+			this.$save(mutation, { key, cert }, { redirect: false })
 		}
 	}
 }
 </script>
 
+<style module>
+.field textarea {
+	font-size: 11px;
+	height: 380px;
+}
+</style>
+
 <style scoped>
 form div {
 	display: grid;
-	grid-template-columns: [col] 50% [col] 50%;
-	grid-template-rows: auto;
-	justify-content: space-between;
+	grid-template-columns: auto auto;
+	column-gap: 15px;
 }
-textarea {
-	height: 370px;
-	font-size: 11px;
-}
-label {
-	padding-bottom: 10px;
-}
-button[type='reset'] {
-	margin-right: 15px;
+p {
+	margin: 10px 0;
 }
 </style>

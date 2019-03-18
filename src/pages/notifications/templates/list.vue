@@ -1,104 +1,101 @@
 <template>
-	<section>
-		<p align="right">
-			<router-link
-				:to="'/notifications/templates/new'"
-				class="btn hightlight"
-				title="Add new template"
-			>
-				Add new
-			</router-link>
-		</p>
-		<Table
-			:query="query"
-			:fields="fields"
-			:actions="actions"
-			:filter="filter"
-		/>
-	</section>
+	<Table v-bind="table" />
 </template>
 
 <script>
-import Table from '../../../components/ui/Table/index.vue'
-import { PushTemplates, RemovePushTemplateByID } from '../../../graphql/Push.gql'
+import Table from '../../../components/Table/index.vue'
+import { PushTemplates as query, RemovePushTemplateByID } from '../../../graphql/Push.gql'
 
 export default {
 	components: { Table },
 	data: () => ({
-		query: PushTemplates,
-		fields: {
-			id: {
-				name: 'ID',
-				sortable: true,
-				width: '1',
-				align: 'center'
+		table: {
+			query,
+			fields: {
+				id: {
+					name: 'ID',
+					sortable: true,
+					width: '1',
+					align: 'center'
+				},
+				title: {
+					name: 'Title',
+					sortable: true,
+					searchable: true,
+					valign: 'top',
+					link: { name: 'editNotificationTemplate' }
+				},
+				body: {
+					name: 'Body',
+					sortable: true,
+					searchable: true,
+					valign: 'top'
+				},
+				event: {
+					name: 'Event',
+					sortable: true,
+					filterable() {
+						return {
+							list: this.$parent.$parent.events
+						}
+					},
+					align: 'center'
+				},
+				app: {
+					name: 'App',
+					sortable: true,
+					align: 'center',
+					filterable() {
+						return {
+							list: this.$store.getters.apptypes
+						}
+					}
+				},
+				platform: {
+					name: 'Platform',
+					sortable: true,
+					align: 'center',
+					filterable() {
+						return {
+							list: this.$store.getters.appplatforms
+						}
+					}
+				},
+				active: {
+					name: 'Enabled',
+					sortable: true,
+					width: '1',
+					align: 'center'
+				},
+				createdAt: {
+					name: 'Created',
+					sortable: true,
+					nowrap: true,
+					hook: ({ date }) => date
+				},
+				updatedAt: {
+					name: 'Updated',
+					sortable: true,
+					nowrap: true,
+					hook: ({ date }) => date
+				}
 			},
-			title: {
-				name: 'Title',
-				sortable: true,
-				valign: 'top',
-				link: '/notifications/templates/view/'
-			},
-			body: {
-				name: 'Body',
-				sortable: true,
-				valign: 'top'
-			},
-			event: {
-				name: 'Event',
-				sortable: true,
-				align: 'center'
-			},
-			app: {
-				name: 'App',
-				sortable: true,
-				align: 'center'
-			},
-			platform: {
-				name: 'Platform',
-				sortable: true,
-				align: 'center'
-			},
-			active: {
-				name: 'Enabled',
-				sortable: true,
-				width: '1',
-				align: 'center'
-			}
-		},
-		actions: {
-			edit: {
-				href: '/notifications/templates/edit/'
-			},
-			remove: {
-				query: RemovePushTemplateByID
+			actions: {
+				new: {
+					href: { name: 'newNotificationTemplate' },
+					position: 'top'
+				},
+				view: {
+					href: { name: 'viewNotificationTemplate' }
+				},
+				edit: {
+					href: { name: 'editNotificationTemplate' }
+				},
+				remove: {
+					query: RemovePushTemplateByID
+				}
 			}
 		}
-	}),
-	async created() {
-		if (!this.$store.state.pushTemplateData) await this.$parent.$parent.getData()
-	},
-	computed: {
-		filter() {
-			const { apptype = null, appplatform = null } = this.$store.state.instance || {}
-
-			const { events = null } = this.$store.state.pushTemplateData || {}
-
-			return {
-				title: { searchable: String },
-				body: { searchable: String },
-				event: { validType: String, select: events },
-				app: { validType: String, select: apptype },
-				platform: { validType: String, select: appplatform }
-			}
-		}
-	}
+	})
 }
 </script>
-
-<style scoped>
-p {
-	margin: 0;
-	margin-bottom: 10px;
-}
-</style>

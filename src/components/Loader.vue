@@ -33,7 +33,6 @@ export default {
 }
 </script>
 
-
 <style scoped>
 progress {
 	display: block;

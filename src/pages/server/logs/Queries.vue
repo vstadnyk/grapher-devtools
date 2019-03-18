@@ -1,76 +1,77 @@
 <template>
-	<section>
-		<Table
-			v-if="!$route.params.date"
-			:query="query"
-			:fields="fields"
-			:input="input"
-			:options="options"
-			:filter="filter"
-		/>
-		<router-view />
-	</section>
+	<article>
+		<Table v-if="!$route.params.id" v-bind="table" />
+		<router-view v-else />
+	</article>
 </template>
 
 <script>
-import Table from '../../../components/ui/Table/index.vue'
+import Table from '../../../components/Table/index.vue'
 
-import { QueriesLog } from '../../../graphql/Logs.gql'
+import { QueriesLog as query } from '../../../graphql/Logs.gql'
 
 export default {
 	components: { Table },
 	data: () => ({
-		query: QueriesLog,
-		input: {
-			params: {
-				limit: 10,
-				offset: 0,
-				order: {
-					column: 'date',
-					sort: 'DESC'
+		table: {
+			query,
+			input: {
+				params: {
+					limit: 10,
+					offset: 0,
+					order: {
+						column: 'date',
+						sort: 'DESC'
+					}
 				}
+			},
+			fields: {
+				date: {
+					name: 'Datetime',
+					sortable: true,
+					link: { name: 'viewQueryLog' },
+					width: '25%'
+				},
+				apptype: {
+					name: 'App',
+					sortable: true,
+					align: 'center',
+					width: '25%',
+					filterable() {
+						return {
+							list: this.$store.getters.apptypes
+						}
+					}
+				},
+				appplatform: {
+					name: 'Platform',
+					sortable: true,
+					align: 'center',
+					width: '25%',
+					filterable() {
+						return {
+							list: this.$store.getters.appplatforms
+						}
+					}
+				},
+				operationName: {
+					name: 'Operation',
+					sortable: true,
+					align: 'center',
+					width: '25%'
+				}
+			},
+			actions: {
+				view: {
+					href: { name: 'viewErrorLog' }
+				}
+			},
+			options: {
+				limitStep: 10,
+				idKey: 'date',
+				pagination: true
 			}
-		},
-		fields: {
-			date: {
-				name: 'Datetime',
-				sortable: true,
-				link: '/server/logs/queries/view/',
-				width: '25%'
-			},
-			apptype: {
-				name: 'App',
-				sortable: true,
-				align: 'center',
-				width: '25%'
-			},
-			appplatform: {
-				name: 'Platform',
-				sortable: true,
-				align: 'center',
-				width: '25%'
-			},
-			operationName: {
-				name: 'Operation',
-				sortable: true,
-				align: 'center',
-				width: '25%'
-			}
-		},
-		options: {
-			limitStep: 5,
-			idKey: 'date'
 		}
-	}),
-	computed: {
-		filter() {
-			const { apptype = null, appplatform = null } = this.$store.state.instance || {}
-
-			return {
-				apptype: { validType: String, select: apptype },
-				appplatform: { validType: String, select: appplatform }
-			}
-		}
-	}
+	})
 }
 </script>

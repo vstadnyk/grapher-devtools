@@ -1,0 +1,84 @@
+fragment MailTemplateI18n on MailTemplate_i18n {
+	id
+	alias
+	subject {
+		lang
+		value
+	}
+	message {
+		lang
+		value
+	}
+	active
+	createdAt: info {
+		date: createdAt
+	}
+	updatedAt: info {
+		date: updatedAt
+	}
+}
+
+query MailTemplates($input: GetMailTemplate) {
+	templates: mailTemplates_i18n(input: $input) {
+		count
+		rows {
+			...MailTemplateI18n
+		}
+	}
+}
+
+query MailTemplate($input: GetMailTemplate) {
+	template: mailTemplate_i18n(input: $input) {
+		...MailTemplateI18n
+	}
+}
+
+query MailTemplateByAliasShort($alias: String, $active: Boolean = true) {
+	template: mailTemplate_i18n(input: { alias: [$alias], active: $active }) {
+		id
+		alias
+		subject {
+			lang
+			value
+		}
+		message {
+			lang
+			value
+		}
+	}
+}
+
+query MailTemplateByAliasExist($alias: String) {
+	exist: mailTemplate(input: { alias: [$alias], active: true }) {
+		alias
+	}
+}
+
+query MailTemplatesExist($input: GetMailTemplate) {
+	mailTemplates(input: $input) {
+		count
+		rows {
+			alias
+		}
+	}
+}
+
+query MailConfig {
+	config: mailConfig
+}
+
+mutation SendMail($input: MailerInput!) {
+	_sendMail(input: $input)
+}
+
+mutation AddMailTemplate($input: MailTemplateInput) {
+	_addMailTemplate(input: $input)
+}
+
+mutation EditMailTemplate($id: ID!, $input: MailTemplateInput) {
+	_editMailTemplate(id: $id, input: $input)
+}
+
+mutation RemoveMailTemplateByID($id: [ID]!) {
+	_removeMailTemplate(id: $id)
+}

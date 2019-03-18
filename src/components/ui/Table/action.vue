@@ -7,12 +7,7 @@
 			:title="dic[type].title"
 			v-text="dic[type].icon"
 		/>
-		<router-link
-			v-if="href"
-			:to="href"
-			:class="`btn ${type}`"
-			:title="dic[type].title"
-		>
+		<router-link v-if="href" :to="href" :class="`btn ${type}`" :title="dic[type].title">
 			{{ dic[type].icon }}
 		</router-link>
 	</span>

@@ -3,28 +3,33 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-import API from './controllers/api'
+import User from './controllers/user'
 
 Vue.config.productionTip = false
 
-const api = new API()
+const user = new User()
 
-Object.assign(api, {
+Object.assign(user, {
 	install() {
-		Vue.prototype.$api = this
+		Vue.prototype.$user = this
 	}
 })
 
-Vue.use(api)
+Vue.use(user)
 
 new Vue({
 	router,
 	store,
-	api,
+	user,
 	render: h => h(App),
 	computed: {
 		$app() {
 			return this.$children[0]
+		},
+		url() {
+			const { origin, pathname = '' } = window.location
+
+			return origin.concat(pathname, '#')
 		}
 	}
 }).$mount('#app')

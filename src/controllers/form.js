@@ -1,68 +1,53 @@
-export default class {
-	constructor(form) {
-		this.form = form
-	}
+import { objectMergeRecursive } from './lib'
 
-	static getData(form = {}, blackList = ['langSwitcher']) {
-		return Array.from(form.elements || this.form.elements)
-			.filter(el => el.name)
-			.reduce((memo, { name, value, lang = null }) => {
-				const obj = { ...memo }
+export const parseFieldName = f =>
+	!/\[/.test(f) ? f : [f.split('[').shift()].concat(f.match(/(?=\[)(.*?)(?=\])/gi))
 
-				let val = value
+export const getDataRaw = (form = {}, blackList = []) => {
+	const { elements = [] } = form || {}
 
-				if (blackList.find(row => row === name)) return obj
+	return Array.from(elements)
+		.filter(({ name }) => name)
+		.reduce((memo, { name, value, type = null }) => {
+			const obj = { ...memo }
 
-				if (value === 'true' || value === 'on') val = true
-				if (value === 'false' || value === 'off') val = false
+			let val = value || null
 
-				if (lang) val = !obj[name] ? [{ lang, value }] : obj[name].concat([{ lang, value }])
+			if (val === 'on') val = true
+			if (val === 'off') val = false
 
-				obj[name] = val
+			if (blackList.find(row => row === name)) return obj
 
-				return obj
-			}, {})
-	}
+			if (type === 'number') val = parseFloat(val)
 
-	static arrayToObject(array = []) {
-		if (!array.reduce) return array
+			obj[name] = val
 
-		return array.reduce(
-			(obj, cur) =>
-				Object.assign(obj, {
-					[cur]: cur
-				}),
-			{}
-		)
-	}
-
-	static validator(typeObj, value, list = null) {
-		let val = value
-
-		const type = (typeObj.name || 'none').toLowerCase()
-
-		if (type === 'number') {
-			val = typeObj(val)
-
-			if (Number.isNaN(val))
-				throw new Error(`The specified value "${value}" is not a valid ${type}`)
-		}
-
-		if (type === 'string') {
-			if (typeof val !== 'string')
-				throw new Error(`The specified value "${value}" is not a valid ${type}`)
-
-			val = typeObj(val)
-		}
-
-		if (val && list) {
-			if (
-				(Array.isArray(list) && !list.find(r => r === val)) ||
-				!Object.values(list).find(r => r === val)
-			)
-				throw new Error(`The specified value "${value}" is not in list`)
-		}
-
-		return val
-	}
+			return obj
+		}, {})
 }
+
+export const parseData = (data = {}) => {
+	const result = {}
+
+	Object.entries(data).forEach(([key, value]) => {
+		if (/\[/.test(key)) {
+			const ar = parseFieldName(key)
+
+			objectMergeRecursive(
+				result,
+				ar.reduceRight(
+					(o, v, i) => Object.assign({}, { [v]: i === ar.length - 1 ? value : o }),
+					{}
+				)
+			)
+		} else {
+			Object.assign(result, { [key]: value })
+		}
+	})
+
+	return result
+}
+
+export const getData = (form = {}, blackList = []) => parseData(getDataRaw(form, blackList))
+
+export default { getData }

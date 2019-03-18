@@ -1,8 +1,7 @@
 module.exports = {
 	root: true,
 	env: {
-		browser: true,
-		node: true
+		browser: true
 	},
 	extends: ['plugin:vue/essential', '@vue/airbnb', 'prettier'],
 	rules: {
@@ -10,9 +9,9 @@ module.exports = {
 		'no-debugger': 'off',
 		'no-alert': 'off',
 		semi: [2, 'never'],
-		'comma-dangle': 0,
-		'class-methods-use-this': 0,
-		'no-restricted-syntax': 0,
+		'comma-dangle': 'off',
+		'class-methods-use-this': 'off',
+		'no-restricted-syntax': 'off',
 		'prettier/prettier': 'error',
 		'vue/html-indent': [
 			'error',
@@ -27,7 +26,7 @@ module.exports = {
 	plugins: ['vue', 'prettier', 'graphql'],
 	parserOptions: {
 		parser: 'babel-eslint',
-		ecmaVersion: 9,
+		ecmaVersion: 11,
 		sourceType: 'module'
 	}
 }

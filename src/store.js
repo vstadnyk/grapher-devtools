@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+
 import Vue from 'vue'
 import Vuex from 'vuex'
 
@@ -5,74 +7,126 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
 	state: {
-		isLogin: null,
-		isOnline: true,
 		user: null,
+		userRulesList: null,
 		instance: null,
 		serverTime: null,
+		serverLogerConfig: null,
 		serverLocales: null,
-		pushTemplateData: null
+		pushTemplateData: null,
+		userPermissions: null,
+		mailConfig: null,
+		locationConfig: null,
+		requestsPending: [],
+		requests: []
 	},
 	getters: {
-		accessToken() {
-			return localStorage.getItem('Authorization')
+		userCan: ({ userRulesList: rules = [] }) => arg => {
+			const rule = Array.isArray(arg) ? arg : [arg]
+			const filter = (rules || []).filter(row => rule.find(r => row.value && r === row.rule))
+
+			if (!filter.length) return false
+			if (filter.length !== rule.length) return false
+
+			return true
 		},
-		refreshToken() {
-			return localStorage.getItem('RefreshToken')
-		},
+		authToken: ({ user = {} }) => (token = 'accessToken') => (user || {})[token] || null,
 		lang(state = {}) {
 			const { default: def = 'en' } = state.serverLocales || {}
 
 			return def
+		},
+		langs(state = {}) {
+			const { default: def = 'en', active } = state.serverLocales || {}
+
+			return active || [def]
+		},
+		langsAsObject(state = {}) {
+			const { default: def = 'en', active } = state.serverLocales || {}
+
+			return Object.assign(...(active || [def]).map(l => ({ [l]: l })))
+		},
+		apptypes(state = {}) {
+			return (state.instance || {}).apptype
+		},
+		appplatforms(state = {}) {
+			return (state.instance || {}).appplatform
+		},
+		userPermissionsList(state = {}) {
+			return Object.assign(
+				{},
+				...Object.entries(state.userPermissions || {}).map(([alias, { id, name }]) => ({
+					[id]: name || alias
+				}))
+			)
+		},
+		userPermissionsListAlias(state = {}) {
+			return Object.assign(
+				{},
+				...Object.entries(state.userPermissions || {}).map(([alias, { name }]) => ({
+					[alias]: name || alias
+				}))
+			)
 		}
 	},
 	mutations: {
-		login(state, data = null) {
-			if (!data) return
+		setUserRules: (state, data) => {
+			state.userRulesList = data
+		},
+		setData(state, data) {
+			Object.assign(state, data || {})
+		},
+		setRequestLog(state, data = {}) {
+			state.requestsPending.push(Object.assign({ ...data }, { start: new Date().getTime() }))
+		},
+		updateRequestLog(state, { id, error = null, result }) {
+			const request = state.requestsPending.find(row => row.id === id)
 
-			const {
-				tokens: { accessToken, refreshToken },
-				user
-			} = data
+			state.requestsPending.splice(state.requestsPending.indexOf(request), 1)
 
-			if (accessToken) localStorage.setItem('Authorization', accessToken)
-			if (refreshToken) localStorage.setItem('RefreshToken', refreshToken)
-
-			Object.assign(state, { user, isLogin: true })
+			if (request) {
+				state.requests.push(
+					Object.assign({ ...request }, { error, result, finish: new Date().getTime() })
+				)
+			}
+		},
+		login(state, user) {
+			state.user = user
 		},
 		logout(state) {
-			localStorage.removeItem('Authorization')
-			localStorage.removeItem('RefreshToken')
-
-			Object.assign(state, { user: null, isLogin: null })
-		},
-		refreshToken(state, { accessToken, refreshToken } = {}) {
-			if (accessToken) localStorage.setItem('Authorization', accessToken)
-			if (refreshToken) localStorage.setItem('RefreshToken', refreshToken)
-
-			Object.assign(state, { isLogin: !!accessToken })
-		},
-		isLogin(state, isLogin = null) {
-			Object.assign(state, { isLogin })
-		},
-		isOnline(state, isOnline = null) {
-			Object.assign(state, { isOnline })
-		},
-		setUser(state, user) {
-			Object.assign(state, { user })
+			state.user = null
 		},
 		setInstance(state, instance) {
-			Object.assign(state, { instance })
+			state.instance = instance
 		},
 		setServerTime(state, serverTime) {
-			Object.assign(state, { serverTime })
+			state.serverTime = serverTime
 		},
 		setServerLocales(state, serverLocales) {
-			Object.assign(state, { serverLocales })
+			state.serverLocales = serverLocales
 		},
 		setPushTemplateData(state, pushTemplateData) {
-			Object.assign(state, { pushTemplateData })
+			state.pushTemplateData = pushTemplateData
+		},
+		setUserPermissions(state, userPermissions) {
+			state.userPermissions = userPermissions
+		},
+		setMailConfig(state, mailConfig) {
+			state.mailConfig = mailConfig
+		},
+		setLocationConfig(state, locationConfig) {
+			state.locationConfig = locationConfig
+		},
+		setServerLogerConfig(state, serverLogerConfig) {
+			state.serverLogerConfig = serverLogerConfig
 		}
 	},
-	actions: {}
+	actions: {
+		clearRequestsLog({ state }) {
+			Object.assign(state, {
+				requestsPending: [],
+				requests: []
+			})
+		}
+	}
 })

@@ -1,19 +1,10 @@
 <template>
-	<nav>
-		<SideBarTitle/>
-		<mainmenu :routes="this.$router.options.routes"/>
-	</nav>
+	<nav><side-bar-title /> <mainmenu :routes="$router.options.routes" /></nav>
 </template>
 
 <script>
 import mainmenu from './Menu.vue'
 import SideBarTitle from './SideBarTitle.vue'
 
-export default {
-	name: 'Sidebar',
-	components: {
-		SideBarTitle,
-		mainmenu
-	}
-}
+export default { components: { SideBarTitle, mainmenu } }
 </script>

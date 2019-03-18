@@ -1,49 +1,78 @@
+fragment PushTemplateI18n on PushTemplate_i18n {
+	id
+	title {
+		lang
+		value
+	}
+	body {
+		lang
+		value
+	}
+	event
+	app
+	platform
+	active
+	createdAt: info {
+		date: createdAt
+	}
+	updatedAt: info {
+		date: updatedAt
+	}
+}
+
+fragment PushSubscriberFragment on PushSubscriber {
+	id
+	token
+	event
+	user
+	app
+	platform
+	lang
+	active
+	createdAt: info {
+		date: createdAt
+	}
+	updatedAt: info {
+		date: updatedAt
+	}
+}
+
 query PushData {
 	pushTemplateData
 }
 
 query PushTemplates($input: GetPushTemplateInput) {
-	pushTemplates_i18n(input: $input) {
+	templates: pushTemplates_i18n(input: $input) {
 		count
 		rows {
-			id
-			title {
-				lang
-				value
-			}
-			body {
-				lang
-				value
-			}
-			event
-			app
-			platform
-			active
+			...PushTemplateI18n
 		}
+	}
+}
+
+query PushTemplatesCount($input: GetPushTemplateInput) {
+	templates: pushTemplates(input: $input) {
+		count
 	}
 }
 
 query PushTemplate($input: GetPushTemplateInput) {
-	pushTemplate_i18n(input: $input) {
-		id
-		title {
-			lang
-			value
-		}
-		body {
-			lang
-			value
-		}
-		event
-		app
-		platform
-		active
+	template: pushTemplate_i18n(input: $input) {
+		...PushTemplateI18n
 	}
 }
 
-query PushAutoTemplates {
-	pushTemplates {
+query PushTemplatesByEventExist(
+	$events: [String]
+	$apps: [String]
+	$platforms: [String]
+) {
+	templates: pushTemplates(
+		input: { event: $events, app: $apps, platform: $platforms, active: true }
+	) {
+		count
 		rows {
+			id
 			event
 			app
 			platform
@@ -63,43 +92,32 @@ mutation RemovePushTemplateByID($id: [ID]!) {
 	_removePushTemplate(id: $id)
 }
 
-query PushTemplate_i18n($input: GetPushTemplateInput) {
-	pushTemplate_i18n(input: $input) {
-		id
-		title {
-			lang
-			value
+query PushSubscribers($input: GetSubscribePushInput) {
+	subscribers: pushSubscribers(input: $input) {
+		count
+		rows {
+			...PushSubscriberFragment
 		}
-		body {
-			lang
-			value
-		}
-		event
-		app
-		platform
-		active
 	}
 }
 
-query PushSubscribers($input: GetSubscribePushInput) {
-	pushSubscribers(input: $input) {
+query PushSubscribersCount($input: GetSubscribePushInput) {
+	subscribers: pushSubscribers(input: $input) {
 		count
 		rows {
-			id
-			event
 			user
-			app
-			platform
-			lang
-			active
 		}
+	}
+}
+
+query PushSubscriber($id: ID) {
+	subscriber: pushSubscriber(input: { id: [$id] }) {
+		...PushSubscriberFragment
 	}
 }
 
 query PushSubscriberUsers($id: [ID]) {
-	users(input: {
-		id: $id
-	}) {
+	users(input: { id: $id }) {
 		rows {
 			id
 			fullName
@@ -107,17 +125,12 @@ query PushSubscriberUsers($id: [ID]) {
 	}
 }
 
-query PushSubscriber($id: ID) {
-	pushSubscriber(input: { id: [$id] }) {
-		id
-		token
-		event
-		user
-		app
-		platform
-		lang
-		active
-	}
+query Send($event: String, $users: [ID], $vars: JSON, $data: JSON) {
+	sent: pushTest(event: $event, users: $users, vars: $vars, data: $data)
+}
+
+mutation Subscribe($input: SubscribePushInput) {
+	_subscribePush(input: $input)
 }
 
 mutation RemoveSubscribersByID($id: [ID]) {

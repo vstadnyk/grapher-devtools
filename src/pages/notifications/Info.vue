@@ -1,48 +1,129 @@
 <template>
-	<section>
-		<div>
-			<p>
-				<Generator />
-			</p>
-			<Viewer v-if="info" :objectEntriesTable="info"/>
-		</div>
-		<div>
-
-		</div>
-	</section>
+	<article>
+		<section>
+			<h2>Not existing templates</h2>
+			<Table ref="table" v-bind="table" v-model="selected" />
+		</section>
+	</article>
 </template>
 
 <script>
-import Viewer from '../../components/Viewer.vue'
-import Generator from './generator.vue'
+import Table from '../../components/Table/index.vue'
+
+import {
+	PushTemplatesByEventExist as query,
+	AddPushTemplate as mutation
+} from '../../graphql/Push.gql'
+
+import api from '../../controllers/api'
 
 export default {
-	components: { Viewer, Generator },
+	mixins: [api],
+	components: { Table },
 	data: () => ({
-		info: null
+		selected: [],
+		table: {
+			query,
+			fields: {
+				event: {
+					name: 'Event'
+				},
+				app: {
+					name: 'App'
+				},
+				platform: {
+					name: 'Platform'
+				}
+			},
+			options: {
+				limitStep: 0,
+				showCheckboxes: true
+			},
+			actions: {
+				generate: {
+					text: 'Generate selected',
+					class: 'hightlight',
+					position: 'bottom',
+					click() {
+						if (window.confirm('Generate selected templates?')) this.generate()
+					}
+				}
+			},
+			dataHook({ rows: exists = [] }) {
+				const rows = this.list.filter(
+					({ event, app, platform }) =>
+						!exists.find(
+							row =>
+								row.event === event && row.app === app && row.platform === platform
+						)
+				)
+
+				return { rows, count: rows.length }
+			}
+		}
 	}),
-	async created() {
-		if (!this.$store.state.pushTemplateData) await this.$parent.getData()
+	computed: {
+		config() {
+			return this.$store.state.pushTemplateData || {}
+		},
+		eventsPack() {
+			return this.config.eventsPack || {}
+		},
+		appsOnPlatfroms() {
+			return this.config.appsOnPlatfroms || {}
+		},
+		list() {
+			const all = []
 
-		const { pushTemplateData } = this.$store.state
+			Object.entries(this.appsOnPlatfroms).forEach(([platform, apptypes]) => {
+				apptypes.forEach(app => {
+					;(this.eventsPack[app] || []).forEach(event => {
+						all.push({ id: event.concat(app, platform), event, app, platform })
+					})
+				})
+			})
 
-		if (pushTemplateData)
-			this.info = Object.entries(pushTemplateData).filter(
-				([key]) => !['apptype', 'appplatform', 'applang'].find(row => row === key)
-			)
+			return all
+		},
+		formated() {
+			const { langs = [] } = this.$store.getters
+
+			return this.list
+				.filter(({ id }) => this.selected.find(row => row === id))
+				.map(row => {
+					delete row.id // eslint-disable-line
+
+					return Object.assign({}, row, {
+						title: langs.map(lang => ({
+							lang,
+							value: `Auto title for event ${row.event} ${lang}`
+						})),
+						body: langs.map(lang => ({
+							lang,
+							value: `Auto body for event ${row.event} ${lang}`
+						}))
+					})
+				})
+		}
+	},
+	methods: {
+		async generate() {
+			await Promise.all(this.formated.map(input => this.$query(mutation, { input })))
+
+			this.$root.$app.$emit('success', {
+				message: 'Templates generated',
+				reset: 5000,
+				redirect: 1,
+				onRedirect: () => {
+					this.selected = []
+
+					this.$refs.table.$emit('reset')
+					this.$refs.table.$emit('refetch', 0)
+
+					return true
+				}
+			})
+		}
 	}
 }
 </script>
-
-<style scoped>
-section {
-	display: grid;
-	grid-template-columns: [col] 300px [col] auto;
-	grid-template-rows: auto;
-}
-h2 {
-	margin: 0;
-	margin-bottom: 10px;
-	font-size: inherit;
-}
-</style>

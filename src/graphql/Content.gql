@@ -1,0 +1,48 @@
+fragment ContentI18nFragment on Content_i18n {
+	id
+	alias
+	name {
+		lang
+		value
+	}
+	description {
+		lang
+		value
+	}
+	photo
+	position
+	active
+	createdAt: info {
+		date: createdAt
+	}
+	updatedAt: info {
+		date: updatedAt
+	}
+}
+
+query ContentsI18n($input: GetContentInput) {
+	contents_i18n(input: $input) {
+		count
+		rows {
+			...ContentI18nFragment
+		}
+	}
+}
+
+query ContentI18n($input: GetContentInput) {
+	content_i18n(input: $input) {
+		...ContentI18nFragment
+	}
+}
+
+mutation AddContent($input: ContentInput) {
+	_addContent(input: $input)
+}
+
+mutation EditContent($input: ContentInput, $id: ID!) {
+	_editContent(input: $input, id: $id)
+}
+
+mutation RemoveContent($id: [ID]!) {
+	_removeContent(id: $id)
+}

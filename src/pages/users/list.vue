@@ -1,88 +1,123 @@
 <template>
-	<section>
-		<p align="right">
-			<router-link
-				:to="'/notifications/templates/new'"
-				class="btn hightlight"
-				title="Add new template"
-			>
-				Add new
-			</router-link>
-		</p>
-		<Table
-			:query="query"
-			:fields="fields"
-			:actions="actions"
-		/>
-	</section>
+	<Table v-bind="table" />
 </template>
 
 <script>
-import Table from '../../components/ui/Table/index.vue'
-import { PushTemplates, RemovePushTemplateByID } from '../../graphql/Push.gql'
+import Table from '../../components/Table/index.vue'
+import { Users as query, RemoveUsersByID } from '../../graphql/User.gql'
 
 export default {
 	components: { Table },
 	data: () => ({
-		query: PushTemplates,
-		fields: {
-			id: {
-				name: 'ID',
-				sortable: true,
-				width: '1',
-				align: 'center'
+		table: {
+			query,
+			fields: {
+				id: {
+					name: 'ID',
+					sortable: true,
+					width: '1',
+					align: 'center'
+				},
+				fullName: {
+					name: 'Full name',
+					link: { name: 'editUser' },
+					nowrap: true,
+					sortable: true,
+					searchable: true
+				},
+				firstName: {
+					name: 'First name',
+					sortable: true,
+					searchable: true
+				},
+				lastName: {
+					name: 'Last name',
+					sortable: true,
+					searchable: true
+				},
+				displayName: {
+					name: 'Display name',
+					sortable: true,
+					searchable: true
+				},
+				mail: {
+					name: 'Email',
+					sortable: true,
+					nowrap: true,
+					searchable: true
+				},
+				permission: {
+					name: 'Permission',
+					hook: ({ alias }) => alias,
+					filterable() {
+						return {
+							list: this.$store.getters.userPermissionsList
+						}
+					}
+				},
+				phone: {
+					name: 'Phone',
+					sortable: true,
+					nowrap: true,
+					searchable: true
+				},
+				photo: {
+					name: 'Photo',
+					sortable: true,
+					dataType: Image
+				},
+				locations: {
+					name: 'Locations',
+					nowrap: true
+				},
+				defaultLocation: {
+					name: 'Location',
+					sortable: true
+				},
+				registerWith: {
+					name: 'Register as',
+					sortable: true
+				},
+				loginAt: {
+					name: 'Last login',
+					sortable: true,
+					nowrap: true
+				},
+				createdAt: {
+					name: 'Created',
+					sortable: true,
+					nowrap: true,
+					hook: ({ date }) => date
+				},
+				updatedAt: {
+					name: 'Updated',
+					sortable: true,
+					nowrap: true,
+					hook: ({ date }) => date
+				},
+				active: {
+					name: 'Enabled',
+					sortable: true,
+					width: '1',
+					align: 'center'
+				}
 			},
-			title: {
-				name: 'Title',
-				sortable: true,
-				valign: 'top',
-				link: '/notifications/templates/view/'
-			},
-			body: {
-				name: 'Body',
-				sortable: true,
-				valign: 'top'
-			},
-			event: {
-				name: 'Event',
-				sortable: true,
-				align: 'center',
-				width: '1'
-			},
-			app: {
-				name: 'App',
-				sortable: true,
-				align: 'center',
-				width: '1'
-			},
-			platform: {
-				name: 'Platform',
-				sortable: true,
-				align: 'center',
-				width: '1'
-			},
-			active: {
-				name: 'Enabled',
-				sortable: true,
-				width: '1',
-				align: 'center'
-			}
-		},
-		actions: {
-			edit: {
-				href: '/notifications/templates/edit/'
-			},
-			remove: {
-				query: RemovePushTemplateByID
+			actions: {
+				new: {
+					href: { name: 'newUser' },
+					position: 'top'
+				},
+				view: {
+					href: { name: 'viewUser' }
+				},
+				edit: {
+					href: { name: 'editUser' }
+				},
+				remove: {
+					query: RemoveUsersByID
+				}
 			}
 		}
 	})
 }
 </script>
-
-<style scoped>
-p {
-	margin: 0;
-	margin-bottom: 10px;
-}
-</style>

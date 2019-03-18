@@ -1,18 +1,29 @@
 <template>
-	<section v-if="!isLogin">
-		<p class="error" v-if="!isOnline">
-			Server is offline
-		</p>
-		<form v-if="isOnline && !isLogin" @submit.prevent="login">
+	<section v-if="show">
+		<form @submit.prevent="$emit('submit')">
 			<h1>Authorization</h1>
 			<p>
-				<input autofocus type="mail" name="mail" placeholder="Email" required>
+				<Input
+					autofocus
+					type="mail"
+					name="mail"
+					placeholder="Email"
+					v-model="data.mail"
+					required
+				/>
 			</p>
 			<p>
-				<input type="password" name="pass" placeholder="Password" required>
+				<Input
+					type="password"
+					name="pass"
+					placeholder="Password"
+					v-model="data.pass"
+					required
+				/>
 			</p>
-			<p v-if="error" :class="'status'.concat(!loading ? ' error' : '')" v-text="error">
-			<div align="right">
+			<p v-if="error" v-text="error" :class="'status'.concat(!loading ? ' error' : '')" />
+			<div>
+				<span><img v-if="loading" src="loader.svg"/></span>
 				<button class="btn hightlight" type="submit">Login</button>
 			</div>
 		</form>
@@ -20,54 +31,160 @@
 </template>
 
 <script>
-import { Login as mutation } from '../graphql/User.gql'
-import Form from '../controllers/form'
+import controller from '../components/Form/controller'
+import { user as config } from '../../config'
+import { Login as mutation, PingToken, RefreshToken } from '../graphql/User.gql'
+import { ServerInstance } from '../graphql/Info.gql'
 
 export default {
-	name: 'Login',
+	mixins: [controller],
 	data: () => ({
 		error: null,
-		loading: null
+		loading: null,
+		interval: null,
+		show: false,
+		fields: {
+			mail: {
+				type: String,
+				required: true
+			},
+			pass: {
+				type: String,
+				required: true
+			}
+		}
 	}),
 	computed: {
-		isLogin() {
-			return this.$store.state.isLogin
-		},
-		isOnline() {
-			return this.$store.state.isOnline
+		$db() {
+			return this.$parent.$db
 		}
 	},
+	async created() {
+		await this.ping()
+
+		this.setInterval()
+
+		this.$on('logout', async () => {
+			this.show = true
+			clearInterval(this.interval)
+			this.$store.commit('logout')
+
+			const { id } = await this.$db.user.get()
+
+			await this.$db.user.remove(id)
+		})
+	},
 	methods: {
-		async login(e) {
+		async sync() {
+			this.show = false
+
+			if (!this.$store.state.user) {
+				const [user, rules] = await Promise.all([
+					this.$db.user.get(),
+					this.$db.userRules.get()
+				])
+
+				this.$store.commit('setUserRules', rules)
+				this.$store.commit('login', user)
+			}
+
+			if (!this.$store.state.instance && this.$store.state.user) {
+				try {
+					const { serverInfo: { instance = null } = {} } =
+						(await this.$graphql(ServerInstance)) || {}
+
+					this.$store.commit('setInstance', instance)
+				} catch (error) {
+					console.error(error)
+				}
+			}
+
+			this.show = !this.$store.state.user
+		},
+		setInterval() {
+			clearInterval(this.interval)
+
+			if (config.pingToken)
+				this.interval = setInterval(() => {
+					this.ping()
+				}, config.pingToken)
+		},
+		async ping() {
+			if (this.$store.getters.authToken()) {
+				try {
+					const { ping } = (await this.$graphql(PingToken)) || {}
+
+					if (!ping) await this.refresh()
+				} catch (error) {
+					console.log(error)
+
+					this.$emit('logout')
+				}
+			}
+		},
+		async refresh() {
+			try {
+				const { _refreshToken = {} } =
+					(await this.$graphql(RefreshToken, {
+						token: this.$store.getters.authToken('refreshToken') || ''
+					})) || {}
+
+				const { id } = this.$store.state.user
+
+				await this.$db.user.put(Object.assign({ id }, _refreshToken))
+
+				await this.sync()
+			} catch (error) {
+				throw error
+			}
+		},
+		async submit({ input }) {
 			this.loading = true
-			this.error = 'Loading...'
+			this.error = null
 
 			try {
-				const { _login } = await this.$api.mutate(mutation, Form.getData(e.target))
+				const { login } = await this.$graphql(mutation, input)
 
-				if (_login) {
+				if (login) {
 					const {
-						user: {
-							permission: { rules }
-						}
-					} = _login
+						user: { id, mail, fullName, photo, permission: { rules = {} } } = {},
+						tokens: { accessToken, refreshToken }
+					} = login
 
-					if (rules['devtools-login']) {
-						this.$store.commit('login', _login)
-						this.error = null
+					const user = {
+						id,
+						mail,
+						fullName,
+						photo,
+						accessToken,
+						refreshToken
+					}
+
+					await this.$db.user.put(user)
+
+					const rulesList = Object.entries(rules || {}).map(([rule, value]) => ({
+						rule,
+						value
+					}))
+
+					await Promise.all(rulesList.map(rule => this.$db.userRules.put(rule)))
+
+					await this.sync()
+
+					if (this.$store.getters.userCan('dt-login')) {
+						setTimeout(() => {
+							this.setInterval()
+						}, 100)
 					} else {
 						this.error = 'Permission denied'
+						this.$emit('logout')
 					}
 				}
-
-				this.loading = null
-			} catch (error) {
-				this.loading = null
-
-				this.error = error.type
-
-				console.error(error)
+			} catch ({ message, type = '' }) {
+				this.error = type.concat(': ', message)
 			}
+
+			this.loading = null
 		}
 	}
 }
@@ -85,6 +202,13 @@ form {
 	background: white;
 	padding: 20px;
 	width: 280px;
+}
+div {
+	display: flex;
+	justify-content: space-between;
+}
+img {
+	height: 28px;
 }
 input {
 	width: 100%;

@@ -1,0 +1,57 @@
+fragment ConfigFragment on Config {
+	id
+	key
+	name
+	description
+	value
+	active
+	createdAt: info {
+		date: createdAt
+	}
+	updatedAt: info {
+		date: updatedAt
+	}
+}
+
+query Configs($input: GetConfigInput) {
+	configs(input: $input) {
+		count
+		rows {
+			...ConfigFragment
+		}
+	}
+}
+
+query Config($input: GetConfigInput) {
+	config(input: $input) {
+		...ConfigFragment
+	}
+}
+
+query ConfigValueByKey($key: String) {
+	config(input: { key: [$key] }) {
+		value
+	}
+}
+
+mutation RemoveByID($id: [String!]!) {
+	_removeConfig(key: $id)
+}
+
+mutation Modify(
+	$key: String!
+	$value: JSON
+	$name: String
+	$description: String
+	$active: Boolean
+) {
+	_modifyConfig(
+		input: {
+			key: $key
+			value: $value
+			name: $name
+			description: $description
+			active: $active
+		}
+	)
+}

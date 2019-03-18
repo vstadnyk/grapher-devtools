@@ -6,19 +6,25 @@
 			<thead>
 				<tr>
 					<th v-if="showCheckboxes" width="1">
-						<input type="checkbox" v-model="selectAll">
+						<input type="checkbox" v-model="selectAll" />
 					</th>
 					<th
 						v-for="[column, { sortable, name }] in Object.entries(fields)"
 						:key="column"
 						:valign="filter[column] && !searchFields[column] ? 'top' : 'middle'"
 					>
-						<router-link v-if="sortable" :to="{
-							query: Object.assign({}, $route.query, {
-								column,
-								sort: (order.sort || 'desc').toUpperCase() === 'DESC' ? 'ASC' : 'DESC'
-							})
-						}">
+						<router-link
+							v-if="sortable"
+							:to="{
+								query: Object.assign({}, $route.query, {
+									column,
+									sort:
+										(order.sort || 'desc').toUpperCase() === 'DESC'
+											? 'ASC'
+											: 'DESC'
+								})
+							}"
+						>
 							{{ name || column }}
 							<span v-if="sortable && order.column === column">
 								{{ (order.sort || 'desc').toUpperCase() === 'DESC' ? '↓' : '↑' }}
@@ -39,10 +45,13 @@
 			<tbody v-if="count">
 				<tr v-for="(item, i) in rows" :key="i">
 					<td v-if="showCheckboxes" align="center" width="1">
-						<input type="checkbox" v-model="selected" :value="getId(item)">
+						<input type="checkbox" v-model="selected" :value="getId(item)" />
 					</td>
 					<cell
-						v-for="[column, { alias, width, align, valign, link } = {}] in Object.entries(fields)"
+						v-for="[
+							column,
+							{ alias, width, align, valign, link } = {}
+						] in Object.entries(fields)"
 						:key="column"
 						:width="width"
 						:align="align"
@@ -54,25 +63,31 @@
 					>
 						{{ item[alias] || item[column] }}
 					</cell>
-					<actions v-if="Object.keys(actions).length" :id="getId(item)" :actions="actions" />
+					<actions
+						v-if="Object.keys(actions).length"
+						:id="getId(item)"
+						:actions="actions"
+					/>
 				</tr>
 			</tbody>
 			<tfoot>
 				<tr>
 					<td v-if="actions.remove && selected.length">
-						<button class="btn remove" title="Remove selected" @click="remove">✕</button>
+						<button class="btn remove" title="Remove selected" @click="remove">
+							✕
+						</button>
 					</td>
-					<td :colspan="Object.keys(fields).length + Object.keys(actions).length - (actions.remove && selected.length ? 1 : 0) + 1">
+					<td
+						:colspan="
+							Object.keys(fields).length +
+								Object.keys(actions).length -
+								(actions.remove && selected.length ? 1 : 0) +
+								1
+						"
+					>
 						<p>
-							<Limiter
-								:limit="limit"
-								:count="count"
-								:step="options.limitStep"
-							/>
-							<Pagination
-								:count="count"
-								:limit="limit"
-							/>
+							<Limiter :limit="limit" :count="count" :step="options.limitStep" />
+							<Pagination :count="count" :limit="limit" />
 						</p>
 					</td>
 				</tr>

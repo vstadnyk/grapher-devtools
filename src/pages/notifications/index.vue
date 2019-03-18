@@ -1,44 +1,50 @@
 <template>
-	<section>
-		<p v-if="error" v-text="error" class="error" />
-		<router-view />
-	</section>
+	<router-view />
 </template>
 
 <script>
 import { PushData } from '../../graphql/Push.gql'
+import { ServerLocales } from '../../graphql/Info.gql'
+import api from '../../controllers/api'
 
 export default {
-	data: () => ({
-		error: null
-	}),
-	watch: {
-		$route() {
-			this.error = null
+	mixins: [api],
+	async created() {
+		await this.config()
+	},
+	computed: {
+		events() {
+			const { events = null } = this.$store.state.pushTemplateData || {}
+
+			return events
+		},
+		apps() {
+			const { eventsPack = {} } = this.$store.state.pushTemplateData || {}
+
+			return Object.keys(eventsPack || {})
+		},
+		platforms() {
+			const { appsOnPlatfroms = {} } = this.$store.state.pushTemplateData || {}
+
+			return Object.keys(appsOnPlatfroms || {})
 		}
 	},
-	created() {
-		this.$on('error', error => {
-			this.error = (error.type || '').concat(': ', error.message)
-
-			console.error(error)
-
-			this.$parent.$emit('loader', 'done')
-		})
-	},
 	methods: {
-		async getData() {
-			this.$root.$app.$emit('loader', 'start')
-
-			try {
-				const { pushTemplateData } = await this.$api.query(PushData)
-
-				this.$root.$app.$emit('loader', 'done')
+		async config() {
+			if (!this.$store.state.pushTemplateData) {
+				const { pushTemplateData } = await this.$query(PushData)
 
 				this.$store.commit('setPushTemplateData', pushTemplateData)
-			} catch (error) {
-				this.$parent.$emit('error', error)
 			}
+
+			if (!this.$store.state.serverLocales) {
+				const { serverInfo: { locales = {} } = {} } =
+					(await this.$query(ServerLocales)) || {}
+
+				this.$store.commit('setServerLocales', locales)
+			}
+
+			return this.$store.state.pushTemplateData
 		}
 	}
 }

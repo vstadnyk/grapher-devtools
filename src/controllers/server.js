@@ -1,42 +1,46 @@
-import { api as config } from '../../config'
+import { server as config } from '../../config'
 
-export default class {
-	static get config() {
-		return config
-	}
+export const fetchFileToBlob = async url => {
+	try {
+		const responce = await fetch(url, { mode: 'cors' })
+		const blob = await responce.blob()
 
-	static getHeaders() {
-		const headers = {}
+		return blob
+	} catch (error) {
+		console.error(error)
 
-		Object.entries(config.headers).forEach(([key, value]) => {
-			if (!localStorage.getItem(key) && value) localStorage.setItem(key, value)
-
-			Object.assign(headers, { [key]: localStorage.getItem(key) })
-		})
-
-		return headers
-	}
-
-	static get url() {
-		const { host, ports } = config
-		const { protocol, hostname } = window.location
-
-		return '//'.concat(
-			hostname === host ? host : hostname,
-			':',
-			ports[protocol.replace(':', '')]
-		)
-	}
-
-	static get uri() {
-		return this.url.concat(config.url)
-	}
-
-	static get protocol() {
-		return window.location.protocol
-	}
-
-	static get wsUri() {
-		return (this.protocol === 'https:' ? 'wss:' : 'ws:').concat(this.uri)
+		return null
 	}
 }
+
+export const humanFileSize = (size, si = 1000) => {
+	const i = Math.floor(Math.log(size) / Math.log(si))
+
+	return `${(size / si ** i).toFixed(3) * 1} ${['B', 'kB', 'MB', 'GB', 'TB'][i]}`
+}
+
+export const getFileSize = async url => {
+	let fileSize = 0
+
+	try {
+		const { size = 0 } = (await fetchFileToBlob(url)) || {}
+
+		fileSize = size
+	} catch (error) {
+		console.error(error)
+	}
+
+	return humanFileSize(fileSize)
+}
+
+export const url = (() => {
+	const { host, ports } = config
+	const { protocol, hostname } = window.location
+
+	return protocol.concat(
+		'//',
+		hostname === host ? host : hostname,
+		':',
+		ports[protocol.replace(':', '')]
+	)
+})()

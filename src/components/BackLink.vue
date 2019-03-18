@@ -1,22 +1,42 @@
 <template>
-	<router-link :to="back" v-text="text"/>
+	<router-link :to="to || computed"><slot /></router-link>
 </template>
 
 <script>
 export default {
 	props: {
-		text: {
-			type: String,
-			default: '← Back'
+		filter: {
+			type: Array,
+			default: () => []
+		},
+		to: {
+			type: Object,
+			default: null
 		}
 	},
 	computed: {
-		back() {
-			const { matched } = this.$route
-			const { path } = matched[matched.length - 2]
+		computed() {
+			const query = { ...this.$route.query }
 
-			return path
+			const { matched } = this.$route
+			const { path = '/' } = matched[matched.length - 2] || {}
+
+			this.filter.forEach(row => {
+				delete query[row]
+			})
+
+			return { path, query }
 		}
 	}
 }
 </script>
+
+<style scoped>
+a {
+	color: inherit;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+</style>

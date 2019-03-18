@@ -3,9 +3,10 @@ const CompressionPlugin = require('compression-webpack-plugin')
 module.exports = {
 	lintOnSave: false,
 	productionSourceMap: false,
-	baseUrl: '/',
-	outputDir: 'dist',
-	runtimeCompiler: true,
+	filenameHashing: false,
+	publicPath: '/dev',
+	outputDir: '../grapher/apps/gui/dev',
+	runtimeCompiler: false,
 	configureWebpack: {
 		resolve: {
 			alias: {
@@ -20,16 +21,17 @@ module.exports = {
 		]
 	},
 	chainWebpack: config => {
+		config.plugins.delete('prefetch')
 		config.module
 			.rule('graphql')
-			.test(/\.(gql|graphql)$/)
+			.test(/\.(graphql|gql)$/)
 			.use('graphql-tag/loader')
 			.loader('graphql-tag/loader')
 			.end()
 	},
 	devServer: {
-		compress: true,
-		port: 8082,
+		compress: false,
+		port: 8081,
 		disableHostCheck: true,
 		overlay: {
 			warnings: true,
@@ -37,6 +39,6 @@ module.exports = {
 		}
 	},
 	css: {
-		modules: true
+		modules: false
 	}
 }

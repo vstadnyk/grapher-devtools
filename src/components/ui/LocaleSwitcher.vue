@@ -1,16 +1,7 @@
 <template>
 	<section>
-		<label
-			v-for="l in locales"
-			:key="l"
-			:class="`btn ${l === active ? ' hightlight' : ''}`"
-		>
-			<input
-				type="radio"
-				name="langSwitcher"
-				:value="l"
-				v-model="active"
-			>
+		<label v-for="l in locales" :key="l" :class="`btn ${l === active ? ' hightlight' : ''}`">
+			<input type="radio" name="langSwitcher" :value="l" v-model="active" />
 			{{ langs[l] }}
 		</label>
 	</section>

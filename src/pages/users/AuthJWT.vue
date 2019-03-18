@@ -1,22 +1,22 @@
 <template>
 	<section>
-		<div v-if="error" v-text="error" class="error"/>
+		<div v-if="error" v-text="error" class="error" />
 		<section>
 			<div>
 				<div v-if="info" class="info">
-					<Viewer :objectEntries="info"/>
+					<Viewer :objectEntries="info" />
 				</div>
 			</div>
 			<div>
 				<form @submit.prevent="submit" @reset="reset">
-					<input type="text" name="token" required placeholder="AccessToken">
+					<input type="text" name="token" required placeholder="AccessToken" />
 					<div v-if="tokenInfo">
-						<Viewer :objectEntries="tokenInfo"/>
+						<Viewer :objectEntries="tokenInfo" />
 						<p>
 							<button @click="getUser" class="btn hightlight">Get user</button>
 						</p>
 						<div v-if="userInfo">
-							<Viewer :objectEntries="userInfo"/>
+							<Viewer :objectEntries="userInfo" />
 						</div>
 					</div>
 					<p align="right">

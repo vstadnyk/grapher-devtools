@@ -1,52 +1,22 @@
 <template>
-	<ul v-if="routes" :class="cssClass">
-		<li v-for="a in routes.filter(({ name, menu }) => menu || name)" :key="a.path">
-			<router-link
-				:to="a.path"
-				v-text="a.menu || a.name"
-				:tag="tag"
-				:exact="a.path === '/'"
-			/>
-			<ul v-if="a.children">
-				<li v-for="child in a.children.filter(({ name, menu }) => menu || name)" :key="child.path">
-					<router-link
-						:to="child.path"
-						v-text="child.menu || child.name"
-						:tag="tag"
-					/>
-					<ul v-if="child.children">
-						<li v-for="child in child.children.filter(({ name, menu }) => menu || name)" :key="child.path">
-							<router-link
-								:to="child.path"
-								v-text="child.menu || child.name"
-								:tag="tag"
-							/>
-						</li>
-					</ul>
-				</li>
-			</ul>
+	<ul v-if="routes">
+		<li v-for="({ path, menu, children }, i) in routes.filter(({ menu }) => menu)" :key="i">
+			<router-link :to="path" v-text="menu" />
+			<Menu :routes="children" />
 		</li>
 	</ul>
 </template>
 
 <script>
-export default {
-	name: 'Menu',
-	props: {
-		routes: Array,
-		cssClass: String,
-		tag: {
-			type: String,
-			default: 'a'
-		}
-	}
-}
+export default { name: 'Menu', props: { routes: Array } }
 </script>
 
 <style scoped>
 a {
 	display: block;
 	padding: 12px;
+	text-decoration: none;
+	color: inherit;
 	border-left: 4px solid transparent;
 }
 a:hover,

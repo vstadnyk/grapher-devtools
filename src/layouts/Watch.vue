@@ -1,48 +1,53 @@
 <template>
 	<section>
 		<div>
-			<h2>{{ time }}</h2>
-			<h4>{{ date }}</h4>
+			<h2 v-text="time" />
+			<h4 v-text="date" />
 		</div>
 	</section>
 </template>
 
 <script>
 import moment from 'moment'
+import api from '../controllers/api'
 import { ServerTime as query } from '../graphql/Info.gql'
 
 export default {
-	name: 'Watch',
-	data: () => ({
-		timer: null
-	}),
+	mixins: [api],
+	data: () => ({ queryTime: null, timer: null }),
 	computed: {
+		serverTime() {
+			return this.queryTime || this.$store.state.serverTime
+		},
 		time() {
-			return moment(this.$store.state.serverTime).format('HH:mm:ss')
+			return moment(this.serverTime || new Date()).format('HH:mm:ss')
 		},
 		date() {
-			return moment(this.$store.state.serverTime).format('ddd, DD MMMM YYYY')
+			return moment(this.serverTime || new Date()).format('ddd, DD MMMM YYYY')
 		}
 	},
 	async created() {
-		clearInterval(this.$parent.serverTimeInterval)
+		clearInterval(this.timer)
 
 		try {
-			const { serverInfo } = await this.$api.query({ query })
+			const { serverInfo = {} } = (await this.$graphql(query)) || {}
 
-			this.$store.commit('setServerTime', serverInfo.dateTime)
+			this.queryTime = (serverInfo || {}).dateTime || null
+
+			this.$store.commit('setServerTime', this.queryTime)
+
+			this.timer = setInterval(() => {
+				if (this.serverTime)
+					this.$store.commit(
+						'setServerTime',
+						moment(this.serverTime)
+							.add(1, 'seconds')
+							.format('YYYY-MM-DD HH:mm:ss')
+					)
+			}, 1000)
 		} catch (error) {
 			console.error(error)
 		}
-
-		this.$parent.serverTimeInterval = setInterval(() => {
-			this.$store.commit(
-				'setServerTime',
-				moment(this.$store.state.serverTime)
-					.add(1, 'seconds')
-					.format('YYYY-MM-DD HH:mm:ss')
-			)
-		}, 1000)
 	}
 }
 </script>
@@ -52,7 +57,7 @@ section {
 	border-top: 1px solid #ccc;
 	color: #a0a0a0;
 	text-align: center;
-	padding: 15px;
+	padding: 10px;
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;

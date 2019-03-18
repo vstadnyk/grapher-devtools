@@ -1,0 +1,54 @@
+fragment Location on Location_i18n {
+	id
+	lat
+	lng
+	name
+	country {
+		lang
+		value
+	}
+	city {
+		lang
+		value
+	}
+	street {
+		lang
+		value
+	}
+	building
+	description
+	active
+	createdAt: info {
+		date: createdAt
+	}
+	updatedAt: info {
+		date: updatedAt
+	}
+}
+
+query Location_i18n($input: GetLocationInput) {
+	item: location_i18n(input: $input) {
+		...Location
+	}
+}
+
+query Locations($input: GetLocationInput) {
+	locations_i18n(input: $input) {
+		count
+		rows {
+			...Location
+		}
+	}
+}
+
+mutation AddLocation($input: LocationInput) {
+	_addLocation(input: $input)
+}
+
+mutation EditLocation($input: LocationInput, $id: ID!) {
+	_editLocation(input: $input, id: $id)
+}
+
+mutation RemoveLocation($id: [ID]!) {
+	_removeLocation(id: $id)
+}

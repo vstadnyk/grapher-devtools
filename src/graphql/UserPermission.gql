@@ -1,0 +1,54 @@
+fragment UserPermissionFragment on Permission {
+	id
+	name
+	alias
+	rules
+	active
+	createdAt: info {
+		date: createdAt
+	}
+	updatedAt: info {
+		date: updatedAt
+	}
+}
+
+query UserPermissionsShort($input: GetPermissionsInput) {
+	permissions(input: $input) {
+		rows {
+			id
+			alias
+			name
+		}
+	}
+}
+
+query UserPermissions($input: GetPermissionsInput) {
+	permissions(input: $input) {
+		count
+		rows {
+			...UserPermissionFragment
+		}
+	}
+}
+
+query UserPermission($input: GetPermissionsInput) {
+	permission(input: $input) {
+		...UserPermissionFragment
+	}
+}
+
+query Available {
+	rules: permissionsAvailable
+}
+
+mutation AddUserPermission($input: PermissionInput) {
+	_addUserPermission(input: $input)
+}
+
+mutation EditUserPermission($input: PermissionInput, $id: ID!) {
+	_editUserPermission(input: $input, id: $id)
+}
+
+mutation RemovePermission($id: [ID]!) {
+	_removeUserPermission(id: $id)
+}

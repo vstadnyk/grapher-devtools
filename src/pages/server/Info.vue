@@ -1,80 +1,53 @@
 <template>
-	<section>
-		<Viewer v-if="serverInfo" :objectEntries="serverInfo"/>
-		<hr>
+	<article>
+		<json-editor v-model="data" :brackets="false" :comma="false" />
+		<hr />
 		<p>
 			<button @click="restart" class="btn">Restart</button>
 			<button @click="stop" class="btn">Stop</button>
 		</p>
-	</section>
+	</article>
 </template>
 
 <script>
+import JsonEditor from 'grapher-json-ui'
+import 'grapher-json-ui/dist/index.css'
+
 import { ServerInfo, RestartServer, StopServer } from '../../graphql/Info.gql'
 
-import Viewer from '../../components/Viewer.vue'
+import api from '../../controllers/api'
 
 export default {
-	components: { Viewer },
+	components: { JsonEditor },
+	mixins: [api],
 	data: () => ({
-		serverInfo: null
+		data: null
 	}),
 	async created() {
-		this.$root.$app.$emit('loader', 'start')
+		const { serverInfo } = (await this.$query(ServerInfo)) || {}
 
-		try {
-			const { serverInfo } = await this.$api.query(ServerInfo)
-
-			this.serverInfo = Object.entries(serverInfo)
-
-			this.$root.$app.$emit('loader', 'done')
-		} catch (error) {
-			this.$parent.$emit('error', error)
-		}
+		this.data = serverInfo
 	},
 	methods: {
 		async restart() {
-			if (!window.confirm('Restart server?')) return null
-
-			this.$root.$app.$emit('loader', 'start')
-
-			this.$store.commit('isOnline', null)
-
-			try {
-				await this.$api.mutate(RestartServer)
-
-				this.$root.$app.$emit('loader', 'done')
-			} catch (error) {
-				this.$parent.$emit('error', error)
-			}
-
-			return true
-		},
-		async stop() {
-			if (!window.confirm('Stop server?')) return null
-
-			this.$root.$app.$emit('loader', 'start')
-
-			try {
-				await this.$api.mutate(StopServer)
+			if (window.confirm('Restart server?')) {
+				await this.$query(RestartServer)
 
 				this.$store.commit('isOnline', null)
-
-				this.$root.$app.$emit('loader', 'done')
-			} catch (error) {
-				this.$parent.$emit('error', error)
 			}
+		},
+		async stop() {
+			if (window.confirm('Restart server?')) {
+				await this.$query(StopServer)
 
-			return true
+				this.$store.commit('isOnline', null)
+			}
 		}
 	}
 }
 </script>
 
 <style scoped>
-h1 {
-	margin: 10px 0;
-}
 button {
 	margin: 0 5px;
 }

@@ -1,11 +1,6 @@
 <template>
 	<section>
-		<Table
-			:query="query"
-			:fields="fields"
-			:filter="filter"
-			:actions="actions"
-		/>
+		<Table :query="query" :fields="fields" :filter="filter" :actions="actions" />
 		<router-view />
 	</section>
 </template>

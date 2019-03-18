@@ -1,0 +1,7 @@
+query GetLocales($id: String) {
+	locales(lang: $id)
+}
+
+mutation ModifyLocale($data: JSON, $lang: String) {
+	_modifyLocale(input: $data, lang: $lang)
+}

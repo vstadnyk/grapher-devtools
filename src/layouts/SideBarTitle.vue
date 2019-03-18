@@ -7,27 +7,20 @@
 
 <script>
 import { ServerVersion as query } from '../graphql/Info.gql'
+import api from '../controllers/api'
 
 export default {
-	name: 'SideBarTitle',
-	data: () => ({
-		version: null
-	}),
+	mixins: [api],
+	data: () => ({ version: null }),
 	async created() {
-		try {
-			const { serverInfo: { version = null, instance = null } = {} } =
-				(await this.$api.query({ query })) || {}
+		const { serverInfo: { version = null, instance = null } = {} } =
+			(await this.$query(query)) || {}
 
-			this.version = version
-
-			this.$store.commit('setInstance', instance)
-		} catch (error) {
-			console.error(error)
-		}
+		this.version = version
+		this.$store.commit('setInstance', instance)
 	}
 }
 </script>
-
 
 <style scoped>
 header {
@@ -38,12 +31,14 @@ header {
 header * {
 	vertical-align: middle;
 }
-header a {
+a {
 	font-size: 22px;
 	text-transform: uppercase;
-	padding: 0 15px;
+	padding: 0 10px;
+	text-decoration: none;
+	color: inherit;
 }
-header img {
-	width: 32px;
+a:hover {
+	text-decoration: underline;
 }
 </style>

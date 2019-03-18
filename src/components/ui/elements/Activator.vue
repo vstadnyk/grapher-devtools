@@ -2,13 +2,7 @@
 	<label>
 		<sup v-if="required && label">*</sup>
 		<span v-if="label">{{ label }}:</span>
-		<input
-			v-model="model"
-			type="checkbox"
-			:name="name"
-			:id="id"
-			:value="checked"
-		>
+		<input v-model="model" type="checkbox" :name="name" :id="id" :value="checked" />
 	</label>
 </template>
 

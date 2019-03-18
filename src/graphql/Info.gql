@@ -9,6 +9,11 @@ mutation MutationTest($text: String) {
 query ServerVersion {
 	serverInfo {
 		version
+	}
+}
+
+query ServerInstance {
+	serverInfo {
 		instance
 	}
 }
@@ -27,21 +32,17 @@ query ServerLocales {
 
 query ServerInfo {
 	serverInfo {
-		name
-		version
-		description
-		url
-		hostname
-		port
-		dateTime
-		timeZone
+		Name: name
+		Version: version
+		Description: description
+		ServerTime: dateTime
+		ServerTimeZone: timeZone
 		sslValidFrom
 		sslValidTo
 		apiEndPoint
 		apiEndPointEncrypted
 		subscriptionsEndPoint
 		subscriptionsEndPointEncrypted
-		dataBase
 	}
 }
 

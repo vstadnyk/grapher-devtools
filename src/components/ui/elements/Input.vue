@@ -15,13 +15,9 @@
 			:min="min"
 			:max="max"
 			:class="(cssClass || '').concat(error ? ' error' : '') || null"
-		>
+		/>
 		<datalist v-if="datalist" :id="`${id}-list`">
-			<option
-				v-for="[value, text] in Object.entries(datalist)"
-				:value="value"
-				:key="value"
-			>
+			<option v-for="[value, text] in Object.entries(datalist)" :value="value" :key="value">
 				{{ text }}
 			</option>
 		</datalist>

@@ -1,14 +1,10 @@
 <template>
-	<section>
-		<h1>{{ title }}</h1>
-	</section>
+	<section><h1 v-text="title" /></section>
 </template>
 
 <script>
 export default {
-	data: () => ({
-		title: null
-	}),
+	data: () => ({ title: null }),
 	watch: {
 		$route(route) {
 			this.setTitle(route)
@@ -32,9 +28,8 @@ export default {
 
 <style scoped>
 section {
-	border-bottom: 1px solid #ccc;
 	height: calc(100% - 1px);
-	padding: 0 15px;
+	padding: 5px 15px;
 	display: flex;
 	align-items: center;
 }

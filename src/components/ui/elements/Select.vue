@@ -10,11 +10,7 @@
 			:class="(cssClass || '').concat(error ? ' error' : '') || null"
 			:required="required"
 		>
-			<option
-				v-for="[value, text] in Object.entries(list)"
-				:key="value"
-				:value="value"
-			>
+			<option v-for="[value, text] in Object.entries(list)" :key="value" :value="value">
 				{{ text }}
 			</option>
 		</select>

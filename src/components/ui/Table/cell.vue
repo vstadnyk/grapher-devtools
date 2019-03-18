@@ -4,7 +4,7 @@
 
 		<router-link v-if="href" :to="href">{{ text }}</router-link>
 
-		<p v-for="({ lang, value }) in translations" :key="lang">
+		<p v-for="{ lang, value } in translations" :key="lang">
 			<b>{{ lang }}:</b>
 			{{ value }}
 		</p>

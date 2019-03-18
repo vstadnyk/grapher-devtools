@@ -1,21 +1,45 @@
-fragment user on User {
+fragment AuthUser on User {
 	id
+	mail
 	role
 	fullName
-	role
+	photo
 	permission {
 		rules
 	}
 }
 
-query CurrentUser {
-	user {
-      ...user
-    }
+fragment UserFragment on User {
+	id
+	mail
+	loginAt
+	firstName
+	lastName
+	fullName
+	displayName
+	phone
+	photo
+	locations
+	defaultLocation
+	role
+	permission {
+		id
+		alias
+	}
+	registerWith
+	active
+	createdAt: info {
+		date: createdAt
+	}
+	updatedAt: info {
+		date: updatedAt
+	}
 }
 
-mutation Logout {
-	_logout
+query CurrentUser {
+	user {
+		...AuthUser
+	}
 }
 
 query PingToken {
@@ -26,17 +50,15 @@ query AuthTokenInfo($token: String) {
 	tokenInfo(token: $token)
 }
 
-query AuthUser($input: GetUser) {
-	user(input: $input) {
-		id
-		mail
-		loginAt
-		firstName
-		lastName
-		fullName
-		role
-		registerWith
-		active
+query GetUserIDByRid($rid: String) {
+	user(input: { rid: [$rid] }) {
+		...UserFragment
+	}
+}
+
+query GetUserIDByMail($mail: String) {
+	user(input: { mail: [$mail] }) {
+		...UserFragment
 	}
 }
 
@@ -46,10 +68,35 @@ query AuthInfo {
 	}
 }
 
+query GetUserByID($id: ID) {
+	user(input: { id: [$id] }) {
+		...UserFragment
+	}
+}
+
+query Users($input: GetUser) {
+	users(input: $input) {
+		count
+		rows {
+			...UserFragment
+		}
+	}
+}
+
+query User($input: GetUser) {
+	user(input: $input) {
+		...UserFragment
+	}
+}
+
+mutation Logout {
+	_logout
+}
+
 mutation Login($mail: String!, $pass: String!) {
-	_login(mail: $mail, pass: $pass) {
+	login: _login(mail: $mail, pass: $pass) {
 		user {
-			...user
+			...AuthUser
 		}
 		tokens {
 			accessToken
@@ -63,4 +110,40 @@ mutation RefreshToken($token: String!) {
 		accessToken
 		refreshToken
 	}
+}
+
+mutation AddUser($input: UserInput) {
+	_addUser(input: $input)
+}
+
+mutation EditUser($input: UserInput, $id: ID!) {
+	_editUser(input: $input, id: $id)
+}
+
+mutation ChangePassword($pass: String!, $id: ID) {
+	_changePass(pass: $pass, id: $id)
+}
+
+mutation RemoveUsersByID($id: [ID]) {
+	_removeUser(input: { id: $id })
+}
+
+mutation EditUserStatus(
+	$id: ID!
+	$status: Boolean
+	$vars: JSON
+	$lang: String
+	$subject: String
+	$message: String
+) {
+	_editUserStatus(
+		id: $id
+		status: $status
+		mailer: {
+			variables: $vars
+			lang: $lang
+			subject: $subject
+			message: $message
+		}
+	)
 }
